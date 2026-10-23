@@ -1,0 +1,520 @@
+{
+  "research-axis-debit": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/AxisBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-axis-debit-otp": {
+    "basedOn": "research-axis-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-axis-debit-failed": {
+    "basedOn": "research-axis-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-axis-debit-future": {
+    "basedOn": "research-axis-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-axis-card-lines": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/AxisBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-axis-card-lines-otp": {
+    "basedOn": "research-axis-card-lines",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-axis-card-lines-failed": {
+    "basedOn": "research-axis-card-lines",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-axis-card-lines-future": {
+    "basedOn": "research-axis-card-lines",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-axis-card-separated": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/AxisBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-axis-card-separated-otp": {
+    "basedOn": "research-axis-card-separated",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-axis-card-separated-failed": {
+    "basedOn": "research-axis-card-separated",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-axis-card-separated-future": {
+    "basedOn": "research-axis-card-separated",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-kotak-sent": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/KotakBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-kotak-sent-otp": {
+    "basedOn": "research-kotak-sent",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-kotak-sent-failed": {
+    "basedOn": "research-kotak-sent",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-kotak-sent-future": {
+    "basedOn": "research-kotak-sent",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-kotak-debit": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/KotakBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-kotak-debit-otp": {
+    "basedOn": "research-kotak-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-kotak-debit-failed": {
+    "basedOn": "research-kotak-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-kotak-debit-future": {
+    "basedOn": "research-kotak-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-idfc-debit": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/IDFCFirstBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-idfc-debit-otp": {
+    "basedOn": "research-idfc-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-idfc-debit-failed": {
+    "basedOn": "research-idfc-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-idfc-debit-future": {
+    "basedOn": "research-idfc-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-idfc-card": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/IDFCFirstBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-idfc-card-otp": {
+    "basedOn": "research-idfc-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-idfc-card-failed": {
+    "basedOn": "research-idfc-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-idfc-card-future": {
+    "basedOn": "research-idfc-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-federal-upi": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/FederalBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-federal-upi-otp": {
+    "basedOn": "research-federal-upi",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-federal-upi-failed": {
+    "basedOn": "research-federal-upi",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-federal-upi-future": {
+    "basedOn": "research-federal-upi",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-federal-card": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/FederalBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-federal-card-otp": {
+    "basedOn": "research-federal-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-federal-card-failed": {
+    "basedOn": "research-federal-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-federal-card-future": {
+    "basedOn": "research-federal-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-pnb-debit": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/PNBBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-pnb-debit-otp": {
+    "basedOn": "research-pnb-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-pnb-debit-failed": {
+    "basedOn": "research-pnb-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-pnb-debit-future": {
+    "basedOn": "research-pnb-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-pnb-card": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/PNBBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-pnb-card-otp": {
+    "basedOn": "research-pnb-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-pnb-card-failed": {
+    "basedOn": "research-pnb-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-pnb-card-future": {
+    "basedOn": "research-pnb-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-canara-paid": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/main/kotlin/com/ritesh/parser/core/bank/CanaraBankParser.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-canara-paid-otp": {
+    "basedOn": "research-canara-paid",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-canara-paid-failed": {
+    "basedOn": "research-canara-paid",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-canara-paid-future": {
+    "basedOn": "research-canara-paid",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-canara-debit": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/main/kotlin/com/ritesh/parser/core/bank/CanaraBankParser.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-canara-debit-otp": {
+    "basedOn": "research-canara-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-canara-debit-failed": {
+    "basedOn": "research-canara-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-canara-debit-future": {
+    "basedOn": "research-canara-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-union-colon-safety": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/main/kotlin/com/ritesh/parser/core/bank/UnionBankParser.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-union-colon-safety-otp": {
+    "basedOn": "research-union-colon-safety",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-union-colon-safety-failed": {
+    "basedOn": "research-union-colon-safety",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-union-colon-safety-future": {
+    "basedOn": "research-union-colon-safety",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-bob-card": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/BankOfBarodaParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-bob-card-otp": {
+    "basedOn": "research-bob-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-bob-card-failed": {
+    "basedOn": "research-bob-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-bob-card-future": {
+    "basedOn": "research-bob-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-boi-beneficiary": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/BankOfIndiaParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-boi-beneficiary-otp": {
+    "basedOn": "research-boi-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-boi-beneficiary-failed": {
+    "basedOn": "research-boi-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-boi-beneficiary-future": {
+    "basedOn": "research-boi-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indian-atm": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/IndianBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-indian-atm-otp": {
+    "basedOn": "research-indian-atm",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indian-atm-failed": {
+    "basedOn": "research-indian-atm",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indian-atm-future": {
+    "basedOn": "research-indian-atm",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indus-debit": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/IndusIndBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-indus-debit-otp": {
+    "basedOn": "research-indus-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indus-debit-failed": {
+    "basedOn": "research-indus-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indus-debit-future": {
+    "basedOn": "research-indus-debit",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indus-semicolon": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/IndusIndBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-indus-semicolon-otp": {
+    "basedOn": "research-indus-semicolon",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indus-semicolon-failed": {
+    "basedOn": "research-indus-semicolon",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-indus-semicolon-future": {
+    "basedOn": "research-indus-semicolon",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-yes-card-upi": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/YesBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-yes-card-upi-otp": {
+    "basedOn": "research-yes-card-upi",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-yes-card-upi-failed": {
+    "basedOn": "research-yes-card-upi",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-yes-card-upi-future": {
+    "basedOn": "research-yes-card-upi",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hsbc-card-used": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/HSBCBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-hsbc-card-used-otp": {
+    "basedOn": "research-hsbc-card-used",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hsbc-card-used-failed": {
+    "basedOn": "research-hsbc-card-used",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hsbc-card-used-future": {
+    "basedOn": "research-hsbc-card-used",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hsbc-paid": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/HSBCBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-hsbc-paid-otp": {
+    "basedOn": "research-hsbc-paid",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hsbc-paid-failed": {
+    "basedOn": "research-hsbc-paid",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hsbc-paid-future": {
+    "basedOn": "research-hsbc-paid",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sc-beneficiary": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/StandardCharteredBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-sc-beneficiary-otp": {
+    "basedOn": "research-sc-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sc-beneficiary-failed": {
+    "basedOn": "research-sc-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sc-beneficiary-future": {
+    "basedOn": "research-sc-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sbi-beneficiary": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/SBIBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-sbi-beneficiary-otp": {
+    "basedOn": "research-sbi-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sbi-beneficiary-failed": {
+    "basedOn": "research-sbi-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sbi-beneficiary-future": {
+    "basedOn": "research-sbi-beneficiary",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sbi-card": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/main/kotlin/com/ritesh/parser/core/bank/SBIBankParser.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-sbi-card-otp": {
+    "basedOn": "research-sbi-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sbi-card-failed": {
+    "basedOn": "research-sbi-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-sbi-card-future": {
+    "basedOn": "research-sbi-card",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hdfc-card-current": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/main/kotlin/com/ritesh/parser/core/bank/HDFCBankParser.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-hdfc-card-current-otp": {
+    "basedOn": "research-hdfc-card-current",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hdfc-card-current-failed": {
+    "basedOn": "research-hdfc-card-current",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-hdfc-card-current-future": {
+    "basedOn": "research-hdfc-card-current",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-icici-card-using": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/test/kotlin/com/ritesh/parser/core/bank/ICICIBankParserTest.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-icici-card-using-otp": {
+    "basedOn": "research-icici-card-using",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-icici-card-using-failed": {
+    "basedOn": "research-icici-card-using",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-icici-card-using-future": {
+    "basedOn": "research-icici-card-using",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-amex-spend": {
+    "url": "https://github.com/ritesh-kanwar/Cashiro/blob/40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce/parser-core/src/main/kotlin/com/ritesh/parser/core/bank/AMEXBankParser.kt",
+    "revision": "40a387fd0bb87bdc51c80124e0fbf084e8a2b2ce",
+    "basis": "Community-maintained format example; rewritten with synthetic values; not issuer-verified."
+  },
+  "research-amex-spend-otp": {
+    "basedOn": "research-amex-spend",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-amex-spend-failed": {
+    "basedOn": "research-amex-spend",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-amex-spend-future": {
+    "basedOn": "research-amex-spend",
+    "basis": "Constructed negative counterexample."
+  },
+  "research-union-otp-number": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-union-otp-after-warning": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-axis-bill": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-sbi-card-payment-received": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-yes-payment-due": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-card-request": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-foreign-icici-limit": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-foreign-idfc-limit": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-bad-comma": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-wrong-comma": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-sender-lookalike": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-boi-incoming-debit-story": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-sc-incoming-debit-story": {
+    "basis": "Constructed negative / false-positive regression."
+  },
+  "research-card-limit-only": {
+    "basis": "Constructed negative / false-positive regression."
+  }
+}

@@ -1,0 +1,10 @@
+<resources>
+    <color name="trace_navy">#17233D</color>
+    <color name="trace_navy_raised">#243653</color>
+    <color name="trace_gold">#C7A15A</color>
+    <color name="trace_paper">#F6F7FB</color>
+    <color name="trace_on_navy">#F8FAFC</color>
+    <color name="trace_on_navy_muted">#BBC5D5</color>
+    <color name="trace_danger">#A54238</color>
+    <color name="trace_danger_on_navy">#FFD2CC</color>
+</resources>

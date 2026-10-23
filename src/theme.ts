@@ -1,0 +1,22 @@
+/** Shared palette for the Android UI and browser demonstration. */
+export const colors = {
+  primary: '#17233D',
+  primaryRaised: '#243653',
+  accent: '#C7A15A',
+  accentInk: '#76551D',
+  accentSoft: '#FFF4DD',
+  ink: '#202638',
+  muted: '#5F6B80',
+  line: '#DFE4EE',
+  paper: '#F6F7FB',
+  surfaceMuted: '#EEF1F7',
+  white: '#FFFFFF',
+  onPrimary: '#F8FAFC',
+  onPrimaryMuted: '#BBC5D5',
+  onPrimaryLine: '#3A4A65',
+  danger: '#A54238',
+  dangerSoft: '#F8E7E3',
+  dangerLine: '#E9CFC3',
+  dangerText: '#884A3A',
+  scrim: '#111B30A8',
+};

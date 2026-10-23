@@ -1,0 +1,97 @@
+[
+  {
+    "name": "HDFC Bank",
+    "senders": ["HDFCBK", "HDFCBN"],
+    "cardOnly": false
+  },
+  {
+    "name": "ICICI Bank",
+    "senders": ["ICICIB", "ICICIT"],
+    "cardOnly": false
+  },
+  {
+    "name": "SBI",
+    "senders": ["SBIINB", "SBIPSG", "SBIBNK", "SBIUPI", "SBIYNO", "ATMSBI"],
+    "cardOnly": false
+  },
+  {
+    "name": "SBI Card",
+    "senders": ["SBICRD"],
+    "cardOnly": true
+  },
+  {
+    "name": "Axis Bank",
+    "senders": ["AXISBK"],
+    "cardOnly": false
+  },
+  {
+    "name": "Kotak Mahindra Bank",
+    "senders": ["KOTAKB"],
+    "cardOnly": false
+  },
+  {
+    "name": "IDFC FIRST Bank",
+    "senders": ["IDFCBK", "IDFCFB"],
+    "cardOnly": false
+  },
+  {
+    "name": "Federal Bank",
+    "senders": ["FEDBNK", "FEDBK"],
+    "cardOnly": false
+  },
+  {
+    "name": "Punjab National Bank",
+    "senders": ["PNBSMS", "PNBBNK"],
+    "cardOnly": false
+  },
+  {
+    "name": "Canara Bank",
+    "senders": ["CANBNK", "CNRBNK"],
+    "cardOnly": false
+  },
+  {
+    "name": "Union Bank of India",
+    "senders": ["UNIONB", "UBISMS"],
+    "cardOnly": false
+  },
+  {
+    "name": "Bank of Baroda",
+    "senders": ["BARBSM", "BOBSMS", "BOBTXN", "BOBCRD"],
+    "cardOnly": false
+  },
+  {
+    "name": "Bank of India",
+    "senders": ["BOIIND", "BOIBNK", "BOISML"],
+    "cardOnly": false
+  },
+  {
+    "name": "Indian Bank",
+    "senders": ["INDBNK", "INDBKS"],
+    "cardOnly": false
+  },
+  {
+    "name": "IndusInd Bank",
+    "senders": ["INDUSB"],
+    "cardOnly": false
+  },
+  {
+    "name": "YES Bank",
+    "senders": ["YESBNK", "YESBK"],
+    "cardOnly": false
+  },
+  {
+    "name": "HSBC",
+    "senders": ["HSBCIN", "HSBC"],
+    "cardOnly": false
+  },
+  {
+    "name": "Standard Chartered",
+    "senders": ["SCBANK"],
+    "cardOnly": false
+  },
+  {
+    "name": "American Express",
+    "senders": ["AMEXIN", "AMEX"],
+    "cardOnly": true
+  }
+]

@@ -1,0 +1,171 @@
+# Synthetic fixtures: id	sender	amountPaise-or-IGNORE	bank	account	method	recipient	reference	body (escaped newlines)
+hdfc-debit-upi	VM-HDFCBK	10000	HDFC Bank	1234	UPI	Example Shop	100000000001	A/c XX1234 debited by INR 100.00 to Example Shop via UPI. Ref 100000000001. Avl bal INR 90,000.00.
+hdfc-card-spend	AD-HDFCBK-S	99950	HDFC Bank	4321	CARD	Example Store	100000000002	Rs.999.50 spent on HDFC Bank card ending 4321 at Example Store on 19-Oct-26. Ref 100000000002.
+hdfc-currency-before	HDFCBN	12345678	HDFC Bank	1234	BANK	-	-	INR 1,23,456.78 has been debited from your account XX1234.
+hdfc-rupee-symbol	AX-HDFCBK-S	10001	HDFC Bank	1234	BANK	-	-	₹100.01 was debited from account XX1234.
+icici-beneficiary-credit	AX-ICICIT-S	100	ICICI Bank	123	UPI	Example Person	100000000003	ICICI Bank Acct XX123 debited for RS 1.00 on 19-Oct-26; Example Person credited. UPI: 100000000003. Call 1800000000 for dispute. SMS BLOCK 123 to 56789
+icici-short-account	AX-ICICIT-S	100	ICICI Bank	123	BANK	-	-	ICICI Bank Acct XX123 debited for RS 1.00 on 19-Oct-26;
+icici-card-spend	AD-ICICIB	12075	ICICI Bank	4321	CARD	Example Cafe	100000000004	INR 120.75 spent on ICICI Bank card ending 4321 at Example Cafe on 19-Oct-26. Ref 100000000004.
+icici-debit-with	VM-ICICIB	2550	ICICI Bank	1234	UPI	Example Shop	100000000005	Account XX1234 debited with Rs.25.50 to Example Shop via UPI. Ref 100000000005.
+sbi-upi-suffix	JD-SBIUPI-S	79900	SBI	1234	UPI	Example Telecom	100000000006	Your A/c XX1234 debited by Rs. 799.00 to Example Telecom via UPI. Ref 100000000006.
+sbi-bank	VM-SBIINB	50000	SBI	1234	BANK	Example Person	100000000007	Account XX1234 debited by INR 500.00 to Example Person. UTR 100000000007.
+sbi-lowercase-sender	jd-sbiupi-s	100	SBI	1234	UPI	-	100000000008	A/c XX1234 debited by Rs.1.00 via UPI. Ref 100000000008.
+unknown-fields	VM-HDFCBK	12345	HDFC Bank	-	BANK	-	-	INR 123.45 debited.
+hdfc-otp	VM-HDFCBK	IGNORE	-	-	-	-	-	OTP 123456 for INR 100.00. Account will be debited.
+hdfc-failed	VM-HDFCBK	IGNORE	-	-	-	-	-	A/c XX1234 debited by INR 100.00. Transaction failed.
+hdfc-own-credit	VM-HDFCBK	IGNORE	-	-	-	-	-	INR 100.00 credited to account XX1234.
+hdfc-future	VM-HDFCBK	IGNORE	-	-	-	-	-	Account XX1234 will be debited by INR 100.00.
+hdfc-balance-only	VM-HDFCBK	IGNORE	-	-	-	-	-	Your account was debited. Avl balance INR 9000.00.
+hdfc-malformed-decimal	VM-HDFCBK	IGNORE	-	-	-	-	-	Account XX1234 debited by INR 10.999.
+hdfc-zero	VM-HDFCBK	IGNORE	-	-	-	-	-	Account XX1234 debited by INR 0.00.
+hdfc-negative	VM-HDFCBK	IGNORE	-	-	-	-	-	Account XX1234 debited by INR -100.00.
+icici-own-credit-with-sender-debit	AX-ICICIT-S	IGNORE	-	-	-	-	-	ICICI Bank Acct XX123 credited for RS 1.00; Sender debited for RS 1.00. UPI: 100000000009.
+icici-ambiguous-credit	AX-ICICIT-S	IGNORE	-	-	-	-	-	ICICI Bank Acct XX123 debited for RS 1.00; Transaction credited. UPI: 100000000010.
+icici-refund	AX-ICICIT-S	IGNORE	-	-	-	-	-	ICICI Bank Acct XX123 debited for RS 1.00; Example Person credited. UPI: 100000000011. Amount refunded.
+icici-beneficiary-but-otp	AX-ICICIT-S	IGNORE	-	-	-	-	-	ICICI Bank Acct XX123 debited for RS 1.00; Example Person credited. UPI: 100000000012. OTP 123456.
+sbi-reversal	VM-SBIUPI	IGNORE	-	-	-	-	-	A/c XX1234 debited by INR 100.00 via UPI. Transaction reversed.
+sbi-request	VM-SBIUPI	IGNORE	-	-	-	-	-	Payment requested. INR 100.00 to be debited from A/c XX1234.
+personal-sender	+919000000000	IGNORE	-	-	-	-	-	A/c XX1234 debited by INR 100.00 via UPI.
+unknown-bank	VM-UNKNOWN	IGNORE	-	-	-	-	-	A/c XX1234 debited by INR 100.00 via UPI.
+hdfc-sent-reported	CP-HDFCBN-S	100	HDFC Bank	1234	BANK	Example Person	100000000020	Sent Rs.1.00 From HDFC Bank A/C *1234 To Example Person On 19-Oct-26 Ref 100000000020 Not You ? Call1800000000
+hdfc-sent-multiline	CP-HDFCBN-S	100	HDFC Bank	1234	BANK	Example Person	100000000021	Sent Rs.1.00\nFrom HDFC Bank A/C *1234\nTo Example Person\nOn 19-Oct-26\nRef 100000000021\nNot You ? Call1800000000
+hdfc-sent-no-amount-gap	CP-HDFCBN-S	100	HDFC Bank	1234	BANK	Example Person	100000000022	Amt Sent Rs.1.00From HDFC Bank A/C *1234 To Example Person On 19-Oct-26 Ref 100000000022
+hdfc-sent-ignore-balance	CP-HDFCBN-S	100	HDFC Bank	1234	UPI	Example Shop	100000000023	Sent Rs.1.00 From HDFC Bank A/C *1234 To Example Shop On 19-Oct-26 Ref 100000000023 UPI Avl Bal Rs.90,000.00
+hdfc-sent-failure	CP-HDFCBN-S	IGNORE	-	-	-	-	-	Sent Rs.1.00 From HDFC Bank A/C *1234 To Example Person On 19-Oct-26 Ref 100000000024. Transaction failed.
+hdfc-sent-otp	CP-HDFCBN-S	IGNORE	-	-	-	-	-	Sent Rs.1.00 From HDFC Bank A/C *1234 To Example Person On 19-Oct-26 Ref 100000000025. OTP 123456.
+hdfc-sent-future	CP-HDFCBN-S	IGNORE	-	-	-	-	-	Will be sent Rs.1.00 From HDFC Bank A/C *1234 To Example Person On 19-Oct-26 Ref 100000000026
+hdfc-sent-other-source	CP-HDFCBN-S	IGNORE	-	-	-	-	-	Sent Rs.1.00 From Another Bank A/C *1234 To HDFC Bank on 19-Oct-26 Ref 100000000027
+hdfc-sent-wrong-bank-sender	AX-ICICIT-S	IGNORE	-	-	-	-	-	Sent Rs.1.00 From HDFC Bank A/C *1234 To Example Person On 19-Oct-26 Ref 100000000028
+research-axis-debit	VM-AXISBK-S	12500	Axis Bank	1234	BANK	-	210000000001	INR 125.00 debited from A/c no. XX1234 on 20-10-2026. Avl bal: INR 9000.00. Ref 210000000001. Not you? SMS BLOCKCARD 4321 to 1800000000 - Axis Bank
+research-axis-debit-otp	VM-AXISBK-S	IGNORE	-	-	-	-	-	INR 125.00 debited from A/c no. XX1234 on 20-10-2026. Avl bal: INR 9000.00. Ref 210000000001. Not you? SMS BLOCKCARD 4321 to 1800000000 - Axis Bank OTP: 123456.
+research-axis-debit-failed	VM-AXISBK-S	IGNORE	-	-	-	-	-	INR 125.00 debited from A/c no. XX1234 on 20-10-2026. Avl bal: INR 9000.00. Ref 210000000001. Not you? SMS BLOCKCARD 4321 to 1800000000 - Axis Bank Transaction failed.
+research-axis-debit-future	VM-AXISBK-S	IGNORE	-	-	-	-	-	INR 125.00 debited from A/c no. XX1234 on 20-10-2026. Avl bal: INR 9000.00. Ref 210000000001. Not you? SMS BLOCKCARD 4321 to 1800000000 - Axis Bank Your account will be debited after confirmation.
+research-axis-card-lines	AX-AXISBK-S	13100	Axis Bank	4321	CARD	Example Shop	-	Spent INR 131\nAxis Bank Card no. XX4321\n20-10-26 09:43:27 IST\nExample Shop\nAvl Limit: INR 50000.00\nNot you? SMS BLOCK 4321 to 1800000000
+research-axis-card-lines-otp	AX-AXISBK-S	IGNORE	-	-	-	-	-	Spent INR 131\nAxis Bank Card no. XX4321\n20-10-26 09:43:27 IST\nExample Shop\nAvl Limit: INR 50000.00\nNot you? SMS BLOCK 4321 to 1800000000 OTP: 123456.
+research-axis-card-lines-failed	AX-AXISBK-S	IGNORE	-	-	-	-	-	Spent INR 131\nAxis Bank Card no. XX4321\n20-10-26 09:43:27 IST\nExample Shop\nAvl Limit: INR 50000.00\nNot you? SMS BLOCK 4321 to 1800000000 Transaction failed.
+research-axis-card-lines-future	AX-AXISBK-S	IGNORE	-	-	-	-	-	Spent INR 131\nAxis Bank Card no. XX4321\n20-10-26 09:43:27 IST\nExample Shop\nAvl Limit: INR 50000.00\nNot you? SMS BLOCK 4321 to 1800000000 Your account will be debited after confirmation.
+research-axis-card-separated	CP-AXISBK-S	56200	Axis Bank	4321	CARD	Example Store	-	Spent\nCard no. XX4321\nINR 562\n20-10-26 12:04:18\nExample Store\nAvl Lmt INR 50000.00\nSMS BLOCK 4321 to 1800000000, if not you - Axis Bank
+research-axis-card-separated-otp	CP-AXISBK-S	IGNORE	-	-	-	-	-	Spent\nCard no. XX4321\nINR 562\n20-10-26 12:04:18\nExample Store\nAvl Lmt INR 50000.00\nSMS BLOCK 4321 to 1800000000, if not you - Axis Bank OTP: 123456.
+research-axis-card-separated-failed	CP-AXISBK-S	IGNORE	-	-	-	-	-	Spent\nCard no. XX4321\nINR 562\n20-10-26 12:04:18\nExample Store\nAvl Lmt INR 50000.00\nSMS BLOCK 4321 to 1800000000, if not you - Axis Bank Transaction failed.
+research-axis-card-separated-future	CP-AXISBK-S	IGNORE	-	-	-	-	-	Spent\nCard no. XX4321\nINR 562\n20-10-26 12:04:18\nExample Store\nAvl Lmt INR 50000.00\nSMS BLOCK 4321 to 1800000000, if not you - Axis Bank Your account will be debited after confirmation.
+research-kotak-sent	JD-KOTAKB-S	1500	Kotak Mahindra Bank	1234	UPI	example.shop@upi	210000000002	Sent Rs.15.00 from Kotak Bank AC X1234 to example.shop@upi on 20-10-26.UPI Ref 210000000002. Not you, contact bank
+research-kotak-sent-otp	JD-KOTAKB-S	IGNORE	-	-	-	-	-	Sent Rs.15.00 from Kotak Bank AC X1234 to example.shop@upi on 20-10-26.UPI Ref 210000000002. Not you, contact bank OTP: 123456.
+research-kotak-sent-failed	JD-KOTAKB-S	IGNORE	-	-	-	-	-	Sent Rs.15.00 from Kotak Bank AC X1234 to example.shop@upi on 20-10-26.UPI Ref 210000000002. Not you, contact bank Transaction failed.
+research-kotak-sent-future	JD-KOTAKB-S	IGNORE	-	-	-	-	-	Sent Rs.15.00 from Kotak Bank AC X1234 to example.shop@upi on 20-10-26.UPI Ref 210000000002. Not you, contact bank Your account will be debited after confirmation.
+research-kotak-debit	JD-KOTAKB-S	100000	Kotak Mahindra Bank	1234	BANK	-	-	Rs.1000.00 debited from your Kotak Bank AC X1234 on 20-10-26. Avl Bal Rs.10000.00
+research-kotak-debit-otp	JD-KOTAKB-S	IGNORE	-	-	-	-	-	Rs.1000.00 debited from your Kotak Bank AC X1234 on 20-10-26. Avl Bal Rs.10000.00 OTP: 123456.
+research-kotak-debit-failed	JD-KOTAKB-S	IGNORE	-	-	-	-	-	Rs.1000.00 debited from your Kotak Bank AC X1234 on 20-10-26. Avl Bal Rs.10000.00 Transaction failed.
+research-kotak-debit-future	JD-KOTAKB-S	IGNORE	-	-	-	-	-	Rs.1000.00 debited from your Kotak Bank AC X1234 on 20-10-26. Avl Bal Rs.10000.00 Your account will be debited after confirmation.
+research-idfc-debit	VM-IDFCFB-S	6800	IDFC FIRST Bank	1234	BANK	-	-	Your A/C XXXXXXX1234 is debited by INR 68.00 on 20/10/26 17:36. New Bal :INR 5000.00
+research-idfc-debit-otp	VM-IDFCFB-S	IGNORE	-	-	-	-	-	Your A/C XXXXXXX1234 is debited by INR 68.00 on 20/10/26 17:36. New Bal :INR 5000.00 OTP: 123456.
+research-idfc-debit-failed	VM-IDFCFB-S	IGNORE	-	-	-	-	-	Your A/C XXXXXXX1234 is debited by INR 68.00 on 20/10/26 17:36. New Bal :INR 5000.00 Transaction failed.
+research-idfc-debit-future	VM-IDFCFB-S	IGNORE	-	-	-	-	-	Your A/C XXXXXXX1234 is debited by INR 68.00 on 20/10/26 17:36. New Bal :INR 5000.00 Your account will be debited after confirmation.
+research-idfc-card	VM-IDFCBK-S	50000	IDFC FIRST Bank	4321	CARD	Example Shop	-	Transaction Successful! INR 500.00 spent on your IDFC FIRST Bank Credit Card ending XX4321 at Example Shop on 20-OCT-2026 at 01:28 PM Avbl Limit: INR 50000.00 If not done by you, call 1800000000
+research-idfc-card-otp	VM-IDFCBK-S	IGNORE	-	-	-	-	-	Transaction Successful! INR 500.00 spent on your IDFC FIRST Bank Credit Card ending XX4321 at Example Shop on 20-OCT-2026 at 01:28 PM Avbl Limit: INR 50000.00 If not done by you, call 1800000000 OTP: 123456.
+research-idfc-card-failed	VM-IDFCBK-S	IGNORE	-	-	-	-	-	Transaction Successful! INR 500.00 spent on your IDFC FIRST Bank Credit Card ending XX4321 at Example Shop on 20-OCT-2026 at 01:28 PM Avbl Limit: INR 50000.00 If not done by you, call 1800000000 Transaction failed.
+research-idfc-card-future	VM-IDFCBK-S	IGNORE	-	-	-	-	-	Transaction Successful! INR 500.00 spent on your IDFC FIRST Bank Credit Card ending XX4321 at Example Shop on 20-OCT-2026 at 01:28 PM Avbl Limit: INR 50000.00 If not done by you, call 1800000000 Your account will be debited after confirmation.
+research-federal-upi	VM-FEDBNK-S	15000	Federal Bank	-	UPI	example.shop@upi	210000000003	Rs 150.00 debited via UPI on 20-10-2026 10:30:25 to VPA example.shop@upi.Ref No 210000000003.Small txns?Use UPI Lite!-Federal Bank
+research-federal-upi-otp	VM-FEDBNK-S	IGNORE	-	-	-	-	-	Rs 150.00 debited via UPI on 20-10-2026 10:30:25 to VPA example.shop@upi.Ref No 210000000003.Small txns?Use UPI Lite!-Federal Bank OTP: 123456.
+research-federal-upi-failed	VM-FEDBNK-S	IGNORE	-	-	-	-	-	Rs 150.00 debited via UPI on 20-10-2026 10:30:25 to VPA example.shop@upi.Ref No 210000000003.Small txns?Use UPI Lite!-Federal Bank Transaction failed.
+research-federal-upi-future	VM-FEDBNK-S	IGNORE	-	-	-	-	-	Rs 150.00 debited via UPI on 20-10-2026 10:30:25 to VPA example.shop@upi.Ref No 210000000003.Small txns?Use UPI Lite!-Federal Bank Your account will be debited after confirmation.
+research-federal-card	VM-FEDBNK-S	120000	Federal Bank	4321	CARD	Example Shop	-	INR 1200.00 spent on your credit card ending with 4321 at Example Shop on 20-10-2026 15:30:15. Available limit Rs.50000.00 -Federal Bank
+research-federal-card-otp	VM-FEDBNK-S	IGNORE	-	-	-	-	-	INR 1200.00 spent on your credit card ending with 4321 at Example Shop on 20-10-2026 15:30:15. Available limit Rs.50000.00 -Federal Bank OTP: 123456.
+research-federal-card-failed	VM-FEDBNK-S	IGNORE	-	-	-	-	-	INR 1200.00 spent on your credit card ending with 4321 at Example Shop on 20-10-2026 15:30:15. Available limit Rs.50000.00 -Federal Bank Transaction failed.
+research-federal-card-future	VM-FEDBNK-S	IGNORE	-	-	-	-	-	INR 1200.00 spent on your credit card ending with 4321 at Example Shop on 20-10-2026 15:30:15. Available limit Rs.50000.00 -Federal Bank Your account will be debited after confirmation.
+research-pnb-debit	VM-PNBSMS-S	500000	Punjab National Bank	1234	BANK	-	-	Ac XX1234 Debited with Rs.5000.00, 20-10-2026 07:47:16. Aval Bal Rs.27000.00 CR. Helpline 1800000000-PNB
+research-pnb-debit-otp	VM-PNBSMS-S	IGNORE	-	-	-	-	-	Ac XX1234 Debited with Rs.5000.00, 20-10-2026 07:47:16. Aval Bal Rs.27000.00 CR. Helpline 1800000000-PNB OTP: 123456.
+research-pnb-debit-failed	VM-PNBSMS-S	IGNORE	-	-	-	-	-	Ac XX1234 Debited with Rs.5000.00, 20-10-2026 07:47:16. Aval Bal Rs.27000.00 CR. Helpline 1800000000-PNB Transaction failed.
+research-pnb-debit-future	VM-PNBSMS-S	IGNORE	-	-	-	-	-	Ac XX1234 Debited with Rs.5000.00, 20-10-2026 07:47:16. Aval Bal Rs.27000.00 CR. Helpline 1800000000-PNB Your account will be debited after confirmation.
+research-pnb-card	VM-PNBSMS-S	500000	Punjab National Bank	4321	CARD	-	-	A/c XX1234 debited with Rs.5000.00,20-10-2026 13:23:22 thru card XX4321. Out of 5 free txn on PNB ATM, you utilized 1 txn. Bal 27000.00 CR. If not done, fwd SMS to 1800000000 to block card-PNB
+research-pnb-card-otp	VM-PNBSMS-S	IGNORE	-	-	-	-	-	A/c XX1234 debited with Rs.5000.00,20-10-2026 13:23:22 thru card XX4321. Out of 5 free txn on PNB ATM, you utilized 1 txn. Bal 27000.00 CR. If not done, fwd SMS to 1800000000 to block card-PNB OTP: 123456.
+research-pnb-card-failed	VM-PNBSMS-S	IGNORE	-	-	-	-	-	A/c XX1234 debited with Rs.5000.00,20-10-2026 13:23:22 thru card XX4321. Out of 5 free txn on PNB ATM, you utilized 1 txn. Bal 27000.00 CR. If not done, fwd SMS to 1800000000 to block card-PNB Transaction failed.
+research-pnb-card-future	VM-PNBSMS-S	IGNORE	-	-	-	-	-	A/c XX1234 debited with Rs.5000.00,20-10-2026 13:23:22 thru card XX4321. Out of 5 free txn on PNB ATM, you utilized 1 txn. Bal 27000.00 CR. If not done, fwd SMS to 1800000000 to block card-PNB Your account will be debited after confirmation.
+research-canara-paid	VM-CANBNK-S	2300	Canara Bank	1234	UPI	Example Shop	210000000004	Rs.23.00 paid thru A/C XX1234 on 20-10-26 16:41:00 to Example Shop, UPI Ref 210000000004-Canara Bank
+research-canara-paid-otp	VM-CANBNK-S	IGNORE	-	-	-	-	-	Rs.23.00 paid thru A/C XX1234 on 20-10-26 16:41:00 to Example Shop, UPI Ref 210000000004-Canara Bank OTP: 123456.
+research-canara-paid-failed	VM-CANBNK-S	IGNORE	-	-	-	-	-	Rs.23.00 paid thru A/C XX1234 on 20-10-26 16:41:00 to Example Shop, UPI Ref 210000000004-Canara Bank Transaction failed.
+research-canara-paid-future	VM-CANBNK-S	IGNORE	-	-	-	-	-	Rs.23.00 paid thru A/C XX1234 on 20-10-26 16:41:00 to Example Shop, UPI Ref 210000000004-Canara Bank Your account will be debited after confirmation.
+research-canara-debit	VM-CNRBNK-S	5000	Canara Bank	1234	BANK	-	-	INR 50.00 has been DEBITED from account XX1234 on 20-10-26. Total Avail.bal INR 1092.62
+research-canara-debit-otp	VM-CNRBNK-S	IGNORE	-	-	-	-	-	INR 50.00 has been DEBITED from account XX1234 on 20-10-26. Total Avail.bal INR 1092.62 OTP: 123456.
+research-canara-debit-failed	VM-CNRBNK-S	IGNORE	-	-	-	-	-	INR 50.00 has been DEBITED from account XX1234 on 20-10-26. Total Avail.bal INR 1092.62 Transaction failed.
+research-canara-debit-future	VM-CNRBNK-S	IGNORE	-	-	-	-	-	INR 50.00 has been DEBITED from account XX1234 on 20-10-26. Total Avail.bal INR 1092.62 Your account will be debited after confirmation.
+research-union-colon-safety	VM-UNIONB-S	10000	Union Bank of India	1234	BANK	-	210000000005	A/c *1234 Debited for Rs:100.00 on 20-10-2026 18:28:02 by Mob Bk ref no 210000000005 Avl Bal Rs:9000.00. Never Share OTP/PIN/CVV.
+research-union-colon-safety-otp	VM-UNIONB-S	IGNORE	-	-	-	-	-	A/c *1234 Debited for Rs:100.00 on 20-10-2026 18:28:02 by Mob Bk ref no 210000000005 Avl Bal Rs:9000.00. Never Share OTP/PIN/CVV. OTP: 123456.
+research-union-colon-safety-failed	VM-UNIONB-S	IGNORE	-	-	-	-	-	A/c *1234 Debited for Rs:100.00 on 20-10-2026 18:28:02 by Mob Bk ref no 210000000005 Avl Bal Rs:9000.00. Never Share OTP/PIN/CVV. Transaction failed.
+research-union-colon-safety-future	VM-UNIONB-S	IGNORE	-	-	-	-	-	A/c *1234 Debited for Rs:100.00 on 20-10-2026 18:28:02 by Mob Bk ref no 210000000005 Avl Bal Rs:9000.00. Never Share OTP/PIN/CVV. Your account will be debited after confirmation.
+research-bob-card	VM-BOBCRD-S	150000	Bank of Baroda	4321	CARD	Example Shop	-	ALERT: INR 1500.00 is spent on your BOBCARD ending 4321 at Example Shop on 20-10-2026 10:30:00. Available credit limit is Rs 50000.00 -Bank of Baroda
+research-bob-card-otp	VM-BOBCRD-S	IGNORE	-	-	-	-	-	ALERT: INR 1500.00 is spent on your BOBCARD ending 4321 at Example Shop on 20-10-2026 10:30:00. Available credit limit is Rs 50000.00 -Bank of Baroda OTP: 123456.
+research-bob-card-failed	VM-BOBCRD-S	IGNORE	-	-	-	-	-	ALERT: INR 1500.00 is spent on your BOBCARD ending 4321 at Example Shop on 20-10-2026 10:30:00. Available credit limit is Rs 50000.00 -Bank of Baroda Transaction failed.
+research-bob-card-future	VM-BOBCRD-S	IGNORE	-	-	-	-	-	ALERT: INR 1500.00 is spent on your BOBCARD ending 4321 at Example Shop on 20-10-2026 10:30:00. Available credit limit is Rs 50000.00 -Bank of Baroda Your account will be debited after confirmation.
+research-boi-beneficiary	VM-BOIIND-S	20000	Bank of India	1234	UPI	Example Person	210000000006	Rs.200.00 debited A/cXX1234 and credited to Example Person via UPI Ref No 210000000006 on 20Oct26. Call 1800000000, if not done by you. -BOI
+research-boi-beneficiary-otp	VM-BOIIND-S	IGNORE	-	-	-	-	-	Rs.200.00 debited A/cXX1234 and credited to Example Person via UPI Ref No 210000000006 on 20Oct26. Call 1800000000, if not done by you. -BOI OTP: 123456.
+research-boi-beneficiary-failed	VM-BOIIND-S	IGNORE	-	-	-	-	-	Rs.200.00 debited A/cXX1234 and credited to Example Person via UPI Ref No 210000000006 on 20Oct26. Call 1800000000, if not done by you. -BOI Transaction failed.
+research-boi-beneficiary-future	VM-BOIIND-S	IGNORE	-	-	-	-	-	Rs.200.00 debited A/cXX1234 and credited to Example Person via UPI Ref No 210000000006 on 20Oct26. Call 1800000000, if not done by you. -BOI Your account will be debited after confirmation.
+research-indian-atm	VM-INDBNK-S	200000	Indian Bank	-	BANK	Example Branch	-	Rs. 2000 withdrawn from ATM at Example Branch on 20/10/2026.Indian Bank
+research-indian-atm-otp	VM-INDBNK-S	IGNORE	-	-	-	-	-	Rs. 2000 withdrawn from ATM at Example Branch on 20/10/2026.Indian Bank OTP: 123456.
+research-indian-atm-failed	VM-INDBNK-S	IGNORE	-	-	-	-	-	Rs. 2000 withdrawn from ATM at Example Branch on 20/10/2026.Indian Bank Transaction failed.
+research-indian-atm-future	VM-INDBNK-S	IGNORE	-	-	-	-	-	Rs. 2000 withdrawn from ATM at Example Branch on 20/10/2026.Indian Bank Your account will be debited after confirmation.
+research-indus-debit	VM-INDUSB-S	123400	IndusInd Bank	1234	UPI	example.shop@upi	210000000007	A/c *XX1234 debited by Rs 1234.00 towards example.shop@upi. RRN: 210000000007. Not You? call 1800000000- IndusInd Bank.
+research-indus-debit-otp	VM-INDUSB-S	IGNORE	-	-	-	-	-	A/c *XX1234 debited by Rs 1234.00 towards example.shop@upi. RRN: 210000000007. Not You? call 1800000000- IndusInd Bank. OTP: 123456.
+research-indus-debit-failed	VM-INDUSB-S	IGNORE	-	-	-	-	-	A/c *XX1234 debited by Rs 1234.00 towards example.shop@upi. RRN: 210000000007. Not You? call 1800000000- IndusInd Bank. Transaction failed.
+research-indus-debit-future	VM-INDUSB-S	IGNORE	-	-	-	-	-	A/c *XX1234 debited by Rs 1234.00 towards example.shop@upi. RRN: 210000000007. Not You? call 1800000000- IndusInd Bank. Your account will be debited after confirmation.
+research-indus-semicolon	VM-INDUSB-S	450000	IndusInd Bank	1234	BANK	-	-	IndusInd A/C XX1234 Debited; INR 4500.00 Ref-ACH DR INW PAY. Bal INR 90000.00. Dispute-Call 1800000000-IndusInd Bank.
+research-indus-semicolon-otp	VM-INDUSB-S	IGNORE	-	-	-	-	-	IndusInd A/C XX1234 Debited; INR 4500.00 Ref-ACH DR INW PAY. Bal INR 90000.00. Dispute-Call 1800000000-IndusInd Bank. OTP: 123456.
+research-indus-semicolon-failed	VM-INDUSB-S	IGNORE	-	-	-	-	-	IndusInd A/C XX1234 Debited; INR 4500.00 Ref-ACH DR INW PAY. Bal INR 90000.00. Dispute-Call 1800000000-IndusInd Bank. Transaction failed.
+research-indus-semicolon-future	VM-INDUSB-S	IGNORE	-	-	-	-	-	IndusInd A/C XX1234 Debited; INR 4500.00 Ref-ACH DR INW PAY. Bal INR 90000.00. Dispute-Call 1800000000-IndusInd Bank. Your account will be debited after confirmation.
+research-yes-card-upi	CP-YESBNK-S	40436	YES Bank	4321	CARD	Example Shop	-	INR 404.36 spent on YES BANK Card X4321 @UPI_Example Shop 20-10-2026 06:17:25 pm. Avl Lmt INR 50000.00. SMS BLKCC 4321 to 1800000000 if not you
+research-yes-card-upi-otp	CP-YESBNK-S	IGNORE	-	-	-	-	-	INR 404.36 spent on YES BANK Card X4321 @UPI_Example Shop 20-10-2026 06:17:25 pm. Avl Lmt INR 50000.00. SMS BLKCC 4321 to 1800000000 if not you OTP: 123456.
+research-yes-card-upi-failed	CP-YESBNK-S	IGNORE	-	-	-	-	-	INR 404.36 spent on YES BANK Card X4321 @UPI_Example Shop 20-10-2026 06:17:25 pm. Avl Lmt INR 50000.00. SMS BLKCC 4321 to 1800000000 if not you Transaction failed.
+research-yes-card-upi-future	CP-YESBNK-S	IGNORE	-	-	-	-	-	INR 404.36 spent on YES BANK Card X4321 @UPI_Example Shop 20-10-2026 06:17:25 pm. Avl Lmt INR 50000.00. SMS BLKCC 4321 to 1800000000 if not you Your account will be debited after confirmation.
+research-hsbc-card-used	VM-HSBCIN-S	30500	HSBC	4321	CARD	Example Shop	-	Your HSBC creditcard xxxxx4321 used at Example Shop for INR 305.00 on 20-10-26.
+research-hsbc-card-used-otp	VM-HSBCIN-S	IGNORE	-	-	-	-	-	Your HSBC creditcard xxxxx4321 used at Example Shop for INR 305.00 on 20-10-26. OTP: 123456.
+research-hsbc-card-used-failed	VM-HSBCIN-S	IGNORE	-	-	-	-	-	Your HSBC creditcard xxxxx4321 used at Example Shop for INR 305.00 on 20-10-26. Transaction failed.
+research-hsbc-card-used-future	VM-HSBCIN-S	IGNORE	-	-	-	-	-	Your HSBC creditcard xxxxx4321 used at Example Shop for INR 305.00 on 20-10-26. Your account will be debited after confirmation.
+research-hsbc-paid	HSBC	100050	HSBC	1234	BANK	Example Electricity	210000000008	HSBC: INR 1000.50 is paid from account XXXXXX1234 to Example Electricity on 20OCT with ref 210000000008. Your available bal is INR 8000.00.
+research-hsbc-paid-otp	HSBC	IGNORE	-	-	-	-	-	HSBC: INR 1000.50 is paid from account XXXXXX1234 to Example Electricity on 20OCT with ref 210000000008. Your available bal is INR 8000.00. OTP: 123456.
+research-hsbc-paid-failed	HSBC	IGNORE	-	-	-	-	-	HSBC: INR 1000.50 is paid from account XXXXXX1234 to Example Electricity on 20OCT with ref 210000000008. Your available bal is INR 8000.00. Transaction failed.
+research-hsbc-paid-future	HSBC	IGNORE	-	-	-	-	-	HSBC: INR 1000.50 is paid from account XXXXXX1234 to Example Electricity on 20OCT with ref 210000000008. Your available bal is INR 8000.00. Your account will be debited after confirmation.
+research-sc-beneficiary	VM-SCBANK-S	30200	Standard Chartered	1234	UPI	-	210000000009	Your a/c XX1234 is debited for Rs. 302.00 on 20-10-2026 15:49 and credited to a/c XX4321 (UPI Ref no 210000000009).Plz call 1800000000 if not done by you.
+research-sc-beneficiary-otp	VM-SCBANK-S	IGNORE	-	-	-	-	-	Your a/c XX1234 is debited for Rs. 302.00 on 20-10-2026 15:49 and credited to a/c XX4321 (UPI Ref no 210000000009).Plz call 1800000000 if not done by you. OTP: 123456.
+research-sc-beneficiary-failed	VM-SCBANK-S	IGNORE	-	-	-	-	-	Your a/c XX1234 is debited for Rs. 302.00 on 20-10-2026 15:49 and credited to a/c XX4321 (UPI Ref no 210000000009).Plz call 1800000000 if not done by you. Transaction failed.
+research-sc-beneficiary-future	VM-SCBANK-S	IGNORE	-	-	-	-	-	Your a/c XX1234 is debited for Rs. 302.00 on 20-10-2026 15:49 and credited to a/c XX4321 (UPI Ref no 210000000009).Plz call 1800000000 if not done by you. Your account will be debited after confirmation.
+research-sbi-beneficiary	VM-SBIINB-S	50000	SBI	1234	BANK	-	-	Dear Customer, Your a/c no. XXXXXXXX1234 is debited for Rs.500.00 on 20-10-26 and a/c XXXXXXX4321 credited (IMPS Ref no ---------------). -SBI
+research-sbi-beneficiary-otp	VM-SBIINB-S	IGNORE	-	-	-	-	-	Dear Customer, Your a/c no. XXXXXXXX1234 is debited for Rs.500.00 on 20-10-26 and a/c XXXXXXX4321 credited (IMPS Ref no ---------------). -SBI OTP: 123456.
+research-sbi-beneficiary-failed	VM-SBIINB-S	IGNORE	-	-	-	-	-	Dear Customer, Your a/c no. XXXXXXXX1234 is debited for Rs.500.00 on 20-10-26 and a/c XXXXXXX4321 credited (IMPS Ref no ---------------). -SBI Transaction failed.
+research-sbi-beneficiary-future	VM-SBIINB-S	IGNORE	-	-	-	-	-	Dear Customer, Your a/c no. XXXXXXXX1234 is debited for Rs.500.00 on 20-10-26 and a/c XXXXXXX4321 credited (IMPS Ref no ---------------). -SBI Your account will be debited after confirmation.
+research-sbi-card	IM-SBICRD-S	75000	SBI Card	4321	CARD	Example Shop	-	Rs.750.00 spent on your SBI Credit Card ending 4321 at Example Shop on 20/10/26. If this txn was not done by you, contact bank.
+research-sbi-card-otp	IM-SBICRD-S	IGNORE	-	-	-	-	-	Rs.750.00 spent on your SBI Credit Card ending 4321 at Example Shop on 20/10/26. If this txn was not done by you, contact bank. OTP: 123456.
+research-sbi-card-failed	IM-SBICRD-S	IGNORE	-	-	-	-	-	Rs.750.00 spent on your SBI Credit Card ending 4321 at Example Shop on 20/10/26. If this txn was not done by you, contact bank. Transaction failed.
+research-sbi-card-future	IM-SBICRD-S	IGNORE	-	-	-	-	-	Rs.750.00 spent on your SBI Credit Card ending 4321 at Example Shop on 20/10/26. If this txn was not done by you, contact bank. Your account will be debited after confirmation.
+research-hdfc-card-current	VM-HDFCBK-S	50000	HDFC Bank	4321	CARD	Example Shop	-	Spent Rs.500.00 On HDFC Bank Card x4321 At Example Shop On 2026-10-20:19:19:33. Avl Limit Rs.50000.00
+research-hdfc-card-current-otp	VM-HDFCBK-S	IGNORE	-	-	-	-	-	Spent Rs.500.00 On HDFC Bank Card x4321 At Example Shop On 2026-10-20:19:19:33. Avl Limit Rs.50000.00 OTP: 123456.
+research-hdfc-card-current-failed	VM-HDFCBK-S	IGNORE	-	-	-	-	-	Spent Rs.500.00 On HDFC Bank Card x4321 At Example Shop On 2026-10-20:19:19:33. Avl Limit Rs.50000.00 Transaction failed.
+research-hdfc-card-current-future	VM-HDFCBK-S	IGNORE	-	-	-	-	-	Spent Rs.500.00 On HDFC Bank Card x4321 At Example Shop On 2026-10-20:19:19:33. Avl Limit Rs.50000.00 Your account will be debited after confirmation.
+research-icici-card-using	AX-ICICIB-S	50000	ICICI Bank	4321	CARD	Example Shop	-	INR 500.00 spent using ICICI Bank Card XX4321 on 20-Oct-26 on Example Shop. Avl Limit: INR 50000.00. If not you, call 1800000000
+research-icici-card-using-otp	AX-ICICIB-S	IGNORE	-	-	-	-	-	INR 500.00 spent using ICICI Bank Card XX4321 on 20-Oct-26 on Example Shop. Avl Limit: INR 50000.00. If not you, call 1800000000 OTP: 123456.
+research-icici-card-using-failed	AX-ICICIB-S	IGNORE	-	-	-	-	-	INR 500.00 spent using ICICI Bank Card XX4321 on 20-Oct-26 on Example Shop. Avl Limit: INR 50000.00. If not you, call 1800000000 Transaction failed.
+research-icici-card-using-future	AX-ICICIB-S	IGNORE	-	-	-	-	-	INR 500.00 spent using ICICI Bank Card XX4321 on 20-Oct-26 on Example Shop. Avl Limit: INR 50000.00. If not you, call 1800000000 Your account will be debited after confirmation.
+research-amex-spend	VM-AMEXIN-S	101770	American Express	1234	CARD	Example Shop	-	Alert: You have spent INR 1017.70 on your AMEX card ** 01234 at Example Shop on 20 October, 2026 at 05:23 PM IST.
+research-amex-spend-otp	VM-AMEXIN-S	IGNORE	-	-	-	-	-	Alert: You have spent INR 1017.70 on your AMEX card ** 01234 at Example Shop on 20 October, 2026 at 05:23 PM IST. OTP: 123456.
+research-amex-spend-failed	VM-AMEXIN-S	IGNORE	-	-	-	-	-	Alert: You have spent INR 1017.70 on your AMEX card ** 01234 at Example Shop on 20 October, 2026 at 05:23 PM IST. Transaction failed.
+research-amex-spend-future	VM-AMEXIN-S	IGNORE	-	-	-	-	-	Alert: You have spent INR 1017.70 on your AMEX card ** 01234 at Example Shop on 20 October, 2026 at 05:23 PM IST. Your account will be debited after confirmation.
+research-union-otp-number	VM-UNIONB-S	IGNORE	-	-	-	-	-	A/c *1234 Debited for Rs:100.00. Never Share OTP 123456.
+research-union-otp-after-warning	VM-UNIONB-S	IGNORE	-	-	-	-	-	A/c *1234 Debited for Rs:100.00. Never Share OTP/PIN/CVV 123456.
+research-axis-bill	AX-AXISBK-S	IGNORE	-	-	-	-	-	Your statement is generated. You spent INR 5000.00 last month. Minimum amount due INR 500.00.
+research-sbi-card-payment-received	VM-SBICRD-S	IGNORE	-	-	-	-	-	Payment of Rs.1000.00 received towards your SBI Card ending 4321. Available limit Rs.50000.00.
+research-yes-payment-due	VM-YESBNK-S	IGNORE	-	-	-	-	-	Your YES Bank Credit Card payment of INR 10000.00 is due by 25-10-26.
+research-card-request	VM-KOTAKB-S	IGNORE	-	-	-	-	-	Payment request of INR 500.00 from merchant@upi. Ignore if already paid.
+research-foreign-icici-limit	AX-ICICIB-S	IGNORE	-	-	-	-	-	USD 50.00 spent using ICICI Bank Card XX4321 on 20-Oct-26 on Example Shop. Avl Limit: INR 50000.00.
+research-foreign-idfc-limit	VM-IDFCBK-S	IGNORE	-	-	-	-	-	Transaction Successful! USD 50.00 spent on your IDFC FIRST Bank Credit Card ending XX4321 at Example Shop on 20-OCT-2026. Avbl Limit: INR 50000.00
+research-bad-comma	VM-AXISBK-S	IGNORE	-	-	-	-	-	INR 1,,000.00 debited from A/c XX1234.
+research-wrong-comma	VM-PNBSMS-S	IGNORE	-	-	-	-	-	Ac XX1234 Debited with Rs.1,2,3.00.
+research-sender-lookalike	VM-XAXISBK	IGNORE	-	-	-	-	-	INR 500.00 debited from A/c XX1234.
+research-boi-incoming-debit-story	VM-BOIIND-S	IGNORE	-	-	-	-	-	Rs.200.00 credited to A/cXX1234; Sender debited by Rs.200.00 via UPI.
+research-sc-incoming-debit-story	VM-SCBANK-S	IGNORE	-	-	-	-	-	Your a/c XX1234 is credited for Rs.302.00. Sender account debited for Rs.302.00.
+research-card-limit-only	VM-SBICRD-S	IGNORE	-	-	-	-	-	Your SBI credit card ending 4321 available limit is INR 50000.00.
+hdfc-card-user-asterisk	CP-HDFCBN-S	78734	HDFC Bank	-	CARD	NJ*bhbjhb POT BHJHBHJ	-	Spent Rs.787.34 On HDFC Bank Card 6789b At NJ*bhbjhb POT BHJHBHJ On 87879\nNot You ? To Block + Resedbejb Call.....
+hdfc-card-user-clean-suffix	AD-HDFCBK-S	78734	HDFC Bank	6789	CARD	NJ*bhbjhb POT BHJHBHJ	-	Spent Rs.787.34 On HDFC Bank Card 6789 At NJ*bhbjhb POT BHJHBHJ On 87879\nNot You ? To Block + Resedbejb Call.....
+hdfc-card-user-failed	CP-HDFCBN-S	IGNORE	-	-	-	-	-	Spent Rs.787.34 On HDFC Bank Card 6789b At NJ*bhbjhb POT BHJHBHJ On 87879\nNot You ? To Block + Resedbejb Call..... Transaction declined.
+hdfc-card-user-otp	CP-HDFCBN-S	IGNORE	-	-	-	-	-	Spent Rs.787.34 On HDFC Bank Card 6789b At NJ*bhbjhb POT BHJHBHJ On 87879\nNot You ? To Block + Resedbejb Call..... OTP 123456.
+hdfc-card-user-refund	CP-HDFCBN-S	IGNORE	-	-	-	-	-	Spent Rs.787.34 On HDFC Bank Card 6789b At NJ*bhbjhb POT BHJHBHJ On 87879\nNot You ? To Block + Resedbejb Call..... Amount refunded.
+hdfc-card-user-due	CP-HDFCBN-S	IGNORE	-	-	-	-	-	Spent Rs.787.34 On HDFC Bank Card 6789b At NJ*bhbjhb POT BHJHBHJ On 87879\nNot You ? To Block + Resedbejb Call..... Payment is due.
+hdfc-card-personal-sender	+919000000000	IGNORE	-	-	-	-	-	Spent Rs.787.34 On HDFC Bank Card 6789b At NJ*bhbjhb POT BHJHBHJ On 87879\nNot You ? To Block + Resedbejb Call.....
