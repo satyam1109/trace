@@ -268,6 +268,21 @@ export function summary(
     surplus: sum(income) - sum(expenses),
   };
 }
+/** Consumption expenses on the local calendar day, independent of the month selector. */
+export function dailySummary(
+  items: Transaction[],
+  currency: Currency,
+  day = new Date(),
+) {
+  const key = localDate(day);
+  const expenses = items.filter(
+    t =>
+      t.category === 'expense' &&
+      currencyOf(t) === currency &&
+      localDate(new Date(transactionTime(t))) === key,
+  );
+  return { spent: sum(expenses), count: expenses.length };
+}
 export const returned = (state: FinanceState, t: Transaction) =>
   state.repayments
     .filter(r => r.transactionId === t.id)
@@ -317,50 +332,6 @@ export function categoryTotals(expenses: Transaction[], state: FinanceState) {
         .reduce((s, t) => s + t.amountPaise, 0),
     }))
     .sort((a, b) => b.amount - a.amount);
-}
-export function comparison(
-  items: Transaction[],
-  month: string,
-  currency: Currency,
-  now = new Date(),
-) {
-  const currentMonth = monthKey(now);
-  const end =
-    month === currentMonth
-      ? now.getDate()
-      : new Date(
-          monthDate(month).getFullYear(),
-          monthDate(month).getMonth() + 1,
-          0,
-        ).getDate();
-  const prev = shiftMonth(month, -1);
-  const previousDays = new Date(
-    monthDate(prev).getFullYear(),
-    monthDate(prev).getMonth() + 1,
-    0,
-  ).getDate();
-  const cut = Math.min(end, previousDays);
-  const scoped = (m: string) =>
-    items.filter(
-      t =>
-        t.category === 'expense' &&
-        currencyOf(t) === currency &&
-        monthKey(transactionTime(t)) === m &&
-        new Date(transactionTime(t)).getDate() <= cut,
-    );
-  const current = sum(scoped(month)),
-    previous = sum(scoped(prev));
-  return {
-    current,
-    previous,
-    days: cut,
-    previousMonth: prev,
-    delta: current - previous,
-    percent: previous
-      ? Math.round(((current - previous) / previous) * 100)
-      : null,
-    hasPrevious: scoped(prev).length > 0,
-  };
 }
 export type BudgetWarning = {
   id: string;

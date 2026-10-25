@@ -17,10 +17,12 @@ import { IncomingPaymentPrompt } from '../components/IncomingPaymentPrompt';
 import { samples } from '../demo';
 import { isBrowser, ledger } from '../services/ledger';
 import type { Transaction, TransactionCategory } from '../types';
-import { monthDate, monthKey, monthLabel } from '../finance/model';
+import { monthKey, monthLabel } from '../finance/model';
 import { FinanceProvider, useFinance } from './store';
 import { Theme, ui, useTheme } from './theme';
-import { Button, Chip, Copy, Empty, ErrorNotice, Sheet } from './components';
+import { dashboardColors } from './dashboardTheme';
+import { GlassMotionContext } from './GlassPressable';
+import { Button, Chip, Copy, Empty, ErrorNotice } from './components';
 import { Home } from './Home';
 import {
   History,
@@ -29,6 +31,7 @@ import {
   type HistoryFilter,
 } from './Transactions';
 import { Analytics } from './Analytics';
+import { MonthPicker } from './MonthPicker';
 import {
   Budgets,
   GoalDetails,
@@ -43,6 +46,7 @@ const settingsScreens = [
   'appearance',
   'profile',
   'categories',
+  'vendors',
   'alerts',
   'security',
   'detection',
@@ -62,6 +66,7 @@ const titles: Record<string, string> = {
   appearance: 'Appearance',
   profile: 'Your profile',
   categories: 'Categories',
+  vendors: 'Remembered vendors',
   alerts: 'Budget alerts',
   security: 'App lock',
   detection: 'Payment detection',
@@ -91,6 +96,7 @@ function WorkspaceContent() {
     [editor, setEditor] = useState<{
       item?: Transaction;
       type?: TransactionCategory;
+      categorySelected?: boolean;
     } | null>(null),
     [selected, setSelected] = useState<string | null>(null),
     [popup, setPopup] = useState<Transaction | null>(null),
@@ -178,6 +184,9 @@ function WorkspaceContent() {
     loan = store.transactions.find(
       t => t.id === route.id && t.category === 'lent',
     );
+  const homeScreen = route.screen === 'home';
+  const navyScreen = homeScreen || route.screen === 'analytics';
+  const chrome = navyScreen ? dashboardColors : c;
   const active =
     route.screen === 'history'
       ? 'History'
@@ -269,8 +278,10 @@ function WorkspaceContent() {
       </SafeAreaView>
     );
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
-      <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: chrome.bg }}>
+      <StatusBar
+        barStyle={navyScreen || dark ? 'light-content' : 'dark-content'}
+      />
       <View
         style={{ flex: 1, width: '100%', maxWidth: 680, alignSelf: 'center' }}
       >
@@ -302,11 +313,11 @@ function WorkspaceContent() {
           ) : null}
           <Text
             style={{
-              fontSize: route.screen === 'home' ? 32 : 25,
+              fontSize: homeScreen ? 32 : 25,
               lineHeight: 38,
               fontWeight: '700',
               letterSpacing: -0.7,
-              color: c.ink,
+              color: chrome.ink,
               flex: 1,
             }}
           >
@@ -321,6 +332,12 @@ function WorkspaceContent() {
           ) ? (
             <Chip
               label={monthLabel(month, true)}
+              style={
+                navyScreen
+                  ? { backgroundColor: dashboardColors.surface }
+                  : undefined
+              }
+              color={navyScreen ? dashboardColors.muted : undefined}
               onPress={() => setMonthPicker(true)}
             />
           ) : null}
@@ -337,7 +354,7 @@ function WorkspaceContent() {
                 alignItems: 'center',
               }}
             >
-              <Icon name="eye" color={c.muted} />
+              <Icon name="eye" color={chrome.muted} />
             </Pressable>
           ) : null}
         </View>
@@ -348,12 +365,12 @@ function WorkspaceContent() {
         >
           <Animated.View style={{ gap: 18, opacity }}>
             {isBrowser ? (
-              <Copy muted size={11}>
+              <Copy color={chrome.muted} size={11}>
                 Browser preview · Sample data · {store.preferences.currency}
               </Copy>
             ) : store.demo ? (
               <View style={ui.spread}>
-                <Copy muted size={11}>
+                <Copy color={chrome.muted} size={11}>
                   Sample workspace
                 </Copy>
                 <Chip
@@ -364,15 +381,17 @@ function WorkspaceContent() {
             ) : null}
             <ErrorNotice message={store.error} />
             {route.screen === 'home' ? (
-              <Home
-                month={month}
-                hidden={hidden}
-                onNavigate={push}
-                onAdd={income =>
-                  setEditor({ type: income ? 'income' : 'expense' })
-                }
-                onOpen={t => setSelected(t.id)}
-              />
+              <GlassMotionContext.Provider value={reduceMotion}>
+                <Home
+                  month={month}
+                  hidden={hidden}
+                  onNavigate={push}
+                  onAdd={income =>
+                    setEditor({ type: income ? 'income' : 'expense' })
+                  }
+                  onOpen={t => setSelected(t.id)}
+                />
+              </GlassMotionContext.Provider>
             ) : null}
             {route.screen === 'history' ? (
               <History
@@ -385,8 +404,9 @@ function WorkspaceContent() {
             ) : null}
             {route.screen === 'analytics' ? (
               <Analytics
-                key={month}
                 month={month}
+                onMonthChange={setMonth}
+                reduceMotion={reduceMotion}
                 onHistory={filter => push('history', undefined, filter)}
               />
             ) : null}
@@ -448,7 +468,7 @@ function WorkspaceContent() {
             paddingHorizontal: 20,
             paddingTop: 6,
             paddingBottom: 12,
-            backgroundColor: c.bg,
+            backgroundColor: chrome.bg,
           }}
         >
           <View
@@ -457,14 +477,14 @@ function WorkspaceContent() {
               height: 74,
               padding: 6,
               borderRadius: 25,
-              backgroundColor: c.surface,
+              backgroundColor: navyScreen ? dashboardColors.bg : c.surface,
               borderWidth: 1,
-              borderColor: c.line,
+              borderColor: navyScreen ? dashboardColors.line : c.line,
               elevation: 4,
             }}
           >
             {[
-              { name: 'Home', icon: 'overview', screen: 'home' },
+              { name: 'Home', icon: 'home', screen: 'home' },
               { name: 'History', icon: 'activity', screen: 'history' },
               { name: 'Add', icon: 'plus', screen: 'add' },
               { name: 'Analytics', icon: 'arrowUp', screen: 'analytics' },
@@ -490,11 +510,11 @@ function WorkspaceContent() {
               >
                 <View
                   style={{
-                    width: tab.screen === 'add' ? 38 : 24,
-                    height: tab.screen === 'add' ? 36 : 24,
-                    borderRadius: 13,
+                    width: tab.screen === 'add' ? 46 : 24,
+                    height: tab.screen === 'add' ? 46 : 24,
+                    borderRadius: 24,
                     backgroundColor:
-                      tab.screen === 'add' ? c.gold : 'transparent',
+                      tab.screen === 'add' ? chrome.gold : 'transparent',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
@@ -504,17 +524,17 @@ function WorkspaceContent() {
                     size={tab.screen === 'add' ? 23 : 21}
                     color={
                       tab.screen === 'add'
-                        ? c.navy
+                        ? chrome.navy
                         : active === tab.name
-                        ? c.goldInk
-                        : c.muted
+                        ? chrome.goldInk
+                        : chrome.muted
                     }
                   />
                 </View>
                 <Copy
                   size={10}
                   bold
-                  color={active === tab.name ? c.goldInk : c.muted}
+                  color={active === tab.name ? chrome.goldInk : chrome.muted}
                 >
                   {tab.name}
                 </Copy>
@@ -526,6 +546,7 @@ function WorkspaceContent() {
       {monthPicker ? (
         <MonthPicker
           month={month}
+          maxMonth={route.screen === 'analytics' ? monthKey() : undefined}
           onSelect={m => {
             setMonth(m);
             setMonthPicker(false);
@@ -538,6 +559,7 @@ function WorkspaceContent() {
           key={editor.item?.id || editor.type}
           item={editor.item}
           type={editor.type}
+          initialCategorySelected={editor.categorySelected}
           onClose={() => setEditor(null)}
           onSaved={() => {
             if (!editor.item) root('history');
@@ -571,76 +593,13 @@ function WorkspaceContent() {
             store.refresh().catch(e => store.setError(String(e)));
           }}
           onEdit={details => {
-            setEditor({ item: { ...popup, ...details } });
+            const { categorySelected, ...values } = details;
+            setEditor({ item: { ...popup, ...values }, categorySelected });
             setPopup(null);
           }}
         />
       ) : null}
     </SafeAreaView>
-  );
-}
-function MonthPicker({
-  month,
-  onSelect,
-  onClose,
-}: {
-  month: string;
-  onSelect: (month: string) => void;
-  onClose: () => void;
-}) {
-  const { colors: c } = useTheme();
-  const [year, setYear] = useState(monthDate(month).getFullYear());
-  return (
-    <Sheet title="Choose month" onClose={onClose}>
-      <View style={ui.spread}>
-        <Button
-          label="Previous year"
-          secondary
-          onPress={() => setYear(Math.max(2000, year - 1))}
-        />
-        <Copy bold size={22}>
-          {year}
-        </Copy>
-        <Button
-          label="Next year"
-          secondary
-          onPress={() => setYear(Math.min(2100, year + 1))}
-        />
-      </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-        {Array.from({ length: 12 }, (_, i) => {
-          const m = `${year}-${String(i + 1).padStart(2, '0')}`,
-            selected = m === month;
-          return (
-            <Pressable
-              key={i}
-              accessibilityRole="button"
-              accessibilityLabel={monthLabel(m)}
-              accessibilityState={{ selected }}
-              onPress={() => onSelect(m)}
-              style={{
-                width: '30%',
-                paddingVertical: 22,
-                borderRadius: 16,
-                alignItems: 'center',
-                backgroundColor: selected ? c.goldSoft : c.surface,
-                borderColor: c.line,
-                borderWidth: 1,
-              }}
-            >
-              <Copy bold={selected} color={selected ? c.goldInk : c.ink}>
-                {new Date(year, i, 1).toLocaleDateString('en-IN', {
-                  month: 'short',
-                })}
-              </Copy>
-            </Pressable>
-          );
-        })}
-      </View>
-      <Copy muted size={12}>
-        Historical months keep their own records and budgets.
-      </Copy>
-    </Sheet>
   );
 }
 export default function TraceApp() {

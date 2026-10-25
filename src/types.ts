@@ -16,6 +16,8 @@ export type Transaction = {
   account: string;
   method: PaymentMethod;
   recipient: string;
+  vendorName?: string;
+  categorySource?: 'vendor' | 'manual' | 'uncategorised';
   category: TransactionCategory;
   expenseCategory: ExpenseCategory;
   remarks: string;
@@ -74,6 +76,7 @@ export type DemoResult = {
 import type { ExpenseCategory } from './categories';
 
 export type ManualExpense = {
+  categorySelected?: boolean;
   currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
   amount: string;
   method: PaymentMethod;
@@ -83,6 +86,11 @@ export type ManualExpense = {
   remarks: string;
   occurredAt: number;
   demo: boolean;
+};
+export type VendorRule = {
+  key: string;
+  name: string;
+  category: ExpenseCategory;
 };
 export const transactionTime = (item: Transaction) =>
   item.transactionAt ?? item.receivedAt;

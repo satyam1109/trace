@@ -9,8 +9,14 @@ import android.view.animation.OvershootInterpolator
 import java.util.function.Consumer
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Dialog
+import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
+import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Handler
@@ -34,6 +40,15 @@ import java.util.Locale
 
 /** The debit is persisted before this optional native editor opens. */
 class PaymentPromptActivity : Activity() {
+    companion object {
+        fun launchIntent(context: Context, transactionId: String) = Intent(context, PaymentPromptActivity::class.java)
+            .putExtra("transactionId", transactionId)
+            // No launcher-task affinity; distinct payments must not reuse an older card's task.
+            .setData(Uri.Builder().scheme("trace-payment").authority("transaction").appendPath(transactionId).build())
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+    }
+    private lateinit var prompt: Dialog
+    val paymentWindow get() = prompt.window!!
     private val handler = Handler(Looper.getMainLooper())
     private var disposed = false
     private var saving = false
@@ -64,6 +79,9 @@ class PaymentPromptActivity : Activity() {
     private lateinit var discard: Button
     private var category = "expense"
     private var expenseCategory = "uncategorised"
+    private var categorySelected = false
+    private var rememberedCategory = false
+    private lateinit var compactCategory: TextView
     private var choiceDialog: AlertDialog? = null
     private val options = mutableListOf(
         "uncategorised" to "Expense (optional)", "food" to "Food", "clothes" to "Clothes",
@@ -77,14 +95,30 @@ class PaymentPromptActivity : Activity() {
         super.onCreate(state)
         restoredState = state
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        window.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
-        window.setDimAmount(0f)
-        window.attributes = window.attributes.apply { y = dp(12) }
+        window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)
+        // A small activity in a separate task has an Android input sink outside
+        // its bounds. Receive that area on a transparent host instead, so an
+        // outside tap can dismiss without passing a click to another app.
+        setContentView(View(this).apply { setOnClickListener { finish() } })
+        prompt = object : Dialog(this, R.style.PaymentCardTheme) {
+            override fun onTouchEvent(event: MotionEvent): Boolean {
+                if (event.action == MotionEvent.ACTION_OUTSIDE) { this@PaymentPromptActivity.finish(); return true }
+                return super.onTouchEvent(event)
+            }
+        }.apply {
+            setCanceledOnTouchOutside(false)
+            setOnCancelListener { this@PaymentPromptActivity.finish() }
+        }
+        paymentWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        paymentWindow.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+        paymentWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        paymentWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
+        paymentWindow.setDimAmount(0f)
+        paymentWindow.attributes = paymentWindow.attributes.apply { y = dp(12) }
 
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
-        setFinishOnTouchOutside(true)
+        paymentWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
         transactionId = intent.getStringExtra("transactionId") ?: run { finish(); return }
         repository = LedgerRepository.get(this)
         repository.executor.execute {
@@ -92,7 +126,11 @@ class PaymentPromptActivity : Activity() {
                 // An older notification must also honour a subsequently enabled app lock.
                 if (repository.preferences().optBoolean("appLock", false)) {
                     runOnUiThread {
-                        startActivity(android.content.Intent(this, com.tracemymoney.MainActivity::class.java).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                        // Only an explicit notification tap may open the locked app.
+                        // An automatic alert must never bring its homepage forward.
+                        if (intent.getBooleanExtra("userInitiated", false)) {
+                            startActivity(Intent(this, com.tracemymoney.MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                        }
                         finish()
                     }
                     return@execute
@@ -141,6 +179,8 @@ class PaymentPromptActivity : Activity() {
         val state = restoredState
         category = state?.getString("category") ?: record.getString("category")
         expenseCategory = state?.getString("expenseCategory") ?: record.getString("expenseCategory")
+        categorySelected = state?.getBoolean("categorySelected") ?: false
+        rememberedCategory = record.optString("categorySource") == "vendor"
         expanded = state?.getBoolean("expanded") ?: false
         card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL; setPadding(dp(22), dp(10), dp(22), dp(18))
@@ -174,6 +214,8 @@ class PaymentPromptActivity : Activity() {
         summary.addView(text("To ${record.optString("recipient").ifEmpty { "Unknown recipient" }}", 17f, bold = true).apply {
             maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END
         })
+        compactCategory = text("", 13f, tint(R.color.trace_gold)).apply { contentDescription = "Payment category" }
+        summary.addView(compactCategory)
         countdown = text("", 13f, tint(R.color.trace_on_navy_muted))
         countdown.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
         details.addView(countdown)
@@ -208,7 +250,8 @@ class PaymentPromptActivity : Activity() {
         details.addView(text("Optional details · saved privately on your phone.", 11f, tint(R.color.trace_on_navy_muted)))
         card.addView(details)
         scroll = ScrollView(this).apply { isFillViewport = false; addView(card); clipToOutline = true }
-        setContentView(scroll)
+        prompt.setContentView(scroll)
+        prompt.show()
         if (Build.VERSION.SDK_INT >= 31) {
             blurListener = Consumer { enabled -> applyGlass(enabled) }
             windowManager.addCrossWindowBlurEnabledListener(mainExecutor, blurListener!!)
@@ -216,11 +259,11 @@ class PaymentPromptActivity : Activity() {
         } else applyGlass(false)
         card.requestFocus()
         applyWindowMode()
-        window.setLayout(sheetWidth(), WindowManager.LayoutParams.WRAP_CONTENT)
+        paymentWindow.setLayout(sheetWidth(), WindowManager.LayoutParams.WRAP_CONTENT)
         scroll.post {
             if (!disposed && !closing) {
                 resizeSheet(false)
-                if (motionEnabled()) window.decorView.apply {
+                if (motionEnabled()) paymentWindow.decorView.apply {
                     translationY = height.toFloat() + dp(24); alpha = 0f; scaleX = 0.96f; scaleY = 0.96f
                     animate().translationY(0f).scaleX(1f).scaleY(1f).setDuration(440).setInterpolator(OvershootInterpolator(0.65f)).start()
                     card.alpha = 0f
@@ -231,7 +274,7 @@ class PaymentPromptActivity : Activity() {
         }
         dirty = state?.getBoolean("dirty") ?: false
         if (dirty) draftRevision = 1
-        // A notification opened later also gets a fresh visible window. Clock
+        // A notification opened later also gets a fresh visible paymentWindow. Clock
         // changes cannot shorten the interaction window; rotation preserves it.
         deadline = state?.getLong("deadline")?.takeIf { it > 0 } ?: (SystemClock.elapsedRealtime() + 5_000)
         tick()
@@ -242,20 +285,20 @@ class PaymentPromptActivity : Activity() {
     private fun motionEnabled() = Build.VERSION.SDK_INT < 26 || ValueAnimator.areAnimatorsEnabled()
     private fun applyGlass(enabled: Boolean) {
         if (disposed) return
-        if (Build.VERSION.SDK_INT >= 31) window.setBackgroundBlurRadius(if (enabled) dp(28) else 0)
-        window.setBackgroundDrawable(GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+        if (Build.VERSION.SDK_INT >= 31) paymentWindow.setBackgroundBlurRadius(if (enabled) dp(28) else 0)
+        paymentWindow.setBackgroundDrawable(GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
             if (enabled) intArrayOf(0xF2243653.toInt(), 0xEB17233D.toInt())
             else intArrayOf(tint(R.color.trace_navy_raised), tint(R.color.trace_navy))).apply { cornerRadius = dp(28).toFloat() })
     }
     private fun applyWindowMode() {
         if (expanded) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            window.setDimAmount(0.16f)
+            paymentWindow.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+            paymentWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            paymentWindow.setDimAmount(0.16f)
         } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
-            window.setDimAmount(0f)
+            paymentWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            paymentWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
+            paymentWindow.setDimAmount(0f)
         }
     }
     private fun setExpanded(value: Boolean) {
@@ -274,19 +317,19 @@ class PaymentPromptActivity : Activity() {
     }
     private fun resizeSheet(animate: Boolean) {
         sizeAnimation?.cancel()
-        val from = window.decorView.height.takeIf { it > 0 } ?: card.height
+        val from = paymentWindow.decorView.height.takeIf { it > 0 } ?: card.height
         details.visibility = if (expanded) View.VISIBLE else View.GONE
         card.measure(View.MeasureSpec.makeMeasureSpec(sheetWidth(), View.MeasureSpec.EXACTLY),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
         val target = minOf(card.measuredHeight, (resources.displayMetrics.heightPixels * 0.82).toInt())
         scroll.scrollTo(0, 0)
         if (!animate || !motionEnabled() || from <= 0) {
-            details.alpha = 1f; window.setLayout(sheetWidth(), target); return
+            details.alpha = 1f; paymentWindow.setLayout(sheetWidth(), target); return
         }
         details.alpha = if (expanded) 0f else 1f
         sizeAnimation = ValueAnimator.ofInt(from, target).apply {
             duration = 260; interpolator = DecelerateInterpolator()
-            addUpdateListener { window.setLayout(sheetWidth(), it.animatedValue as Int) }
+            addUpdateListener { paymentWindow.setLayout(sheetWidth(), it.animatedValue as Int) }
             start()
         }
         if (expanded) details.animate().alpha(1f).setStartDelay(70).setDuration(190).start()
@@ -303,11 +346,11 @@ class PaymentPromptActivity : Activity() {
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val delta = event.rawY - startY
-                    if (motionEnabled()) window.decorView.translationY = delta.coerceIn(-dp(24).toFloat(), dp(56).toFloat()) * 0.3f
+                    if (motionEnabled()) paymentWindow.decorView.translationY = delta.coerceIn(-dp(24).toFloat(), dp(56).toFloat()) * 0.3f
                 }
                 MotionEvent.ACTION_UP -> {
                     gestureActive = false; target.parent.requestDisallowInterceptTouchEvent(false)
-                    window.decorView.animate().translationY(0f).setDuration(if (motionEnabled()) 150 else 0).start()
+                    paymentWindow.decorView.animate().translationY(0f).setDuration(if (motionEnabled()) 150 else 0).start()
                     val delta = event.rawY - startY
                     when {
                         delta < -dp(32) -> setExpanded(true)
@@ -318,7 +361,7 @@ class PaymentPromptActivity : Activity() {
                 }
                 MotionEvent.ACTION_CANCEL -> {
                     gestureActive = false; target.parent.requestDisallowInterceptTouchEvent(false)
-                    window.decorView.translationY = 0f; interact()
+                    paymentWindow.decorView.translationY = 0f; interact()
                 }
             }
             true
@@ -334,13 +377,16 @@ class PaymentPromptActivity : Activity() {
         persistDraft(false)
         closing = true; gestureActive = false; handler.removeCallbacks(ticker); handler.removeCallbacks(draftWriter)
         sizeAnimation?.cancel()
-        window.decorView.animate().translationY(window.decorView.height.toFloat() + dp(24)).alpha(0f)
+        paymentWindow.decorView.animate().translationY(paymentWindow.decorView.height.toFloat() + dp(24)).alpha(0f)
             .setDuration(180).setStartDelay(0).withEndAction { super.finish() }.start()
     }
 
     private fun updateCategoryLabel() {
         val code = if (category == "lent") "lent" else expenseCategory
-        categoryButton.text = "${options.first { it.first == code }.second}  ▾"
+        val label = options.firstOrNull { it.first == code }?.second ?: "Expense"
+        categoryButton.text = "$label  ▾"
+        compactCategory.visibility = if (category == "expense" && expenseCategory != "uncategorised") View.VISIBLE else View.GONE
+        compactCategory.text = label + if (rememberedCategory && !categorySelected) " · Remembered" else ""
     }
     private fun interact() {
         if (disposed || saving || closing) return
@@ -362,6 +408,7 @@ class PaymentPromptActivity : Activity() {
         choiceDialog = AlertDialog.Builder(this).setTitle("Category (optional)")
             .setSingleChoiceItems(options.map { it.second }.toTypedArray(), options.indexOfFirst { it.first == selected }) { dialog, which ->
                 val code = options[which].first
+                categorySelected = true
                 category = if (code == "lent") "lent" else "expense"
                 expenseCategory = if (code == "lent") "uncategorised" else code
                 updateCategoryLabel(); changed(); dialog.dismiss()
@@ -414,14 +461,14 @@ class PaymentPromptActivity : Activity() {
         }
         val revision = draftRevision
         val name = recipient.text.toString(); val note = remarks.text.toString()
-        val kind = category; val expense = expenseCategory
+        val kind = category; val expense = expenseCategory; val selected = categorySelected
         if (close) { saving = true; controls(false); handler.removeCallbacks(ticker) }
         repository.executor.execute {
             try {
-                repository.update(transactionId, name, kind, expense, note)
+                repository.update(transactionId, name, kind, expense, note, selected)
                 if (close) PaymentNotifications.cancel(this, transactionId)
                 runOnUiThread {
-                    if (revision == draftRevision) dirty = false
+                    if (revision == draftRevision) { dirty = false; categorySelected = false }
                     if (!disposed) {
                         saveFailed = false
                         if (close) finish() else tick()
@@ -436,7 +483,7 @@ class PaymentPromptActivity : Activity() {
             outState.putString("recipient", recipient.text.toString()); outState.putString("remarks", remarks.text.toString())
             outState.putString("category", category); outState.putString("expenseCategory", expenseCategory)
             outState.putBoolean("recipientVisible", recipient.visibility == View.VISIBLE)
-            outState.putBoolean("expanded", expanded); outState.putBoolean("dirty", dirty); outState.putLong("deadline", deadline)
+            outState.putBoolean("categorySelected", categorySelected); outState.putBoolean("expanded", expanded); outState.putBoolean("dirty", dirty); outState.putLong("deadline", deadline)
         }
         super.onSaveInstanceState(outState)
     }
@@ -445,11 +492,15 @@ class PaymentPromptActivity : Activity() {
         // repository only updates existing IDs, so late writes cannot resurrect a discard.
         if (!isChangingConfigurations && !discardConfirmed) persistDraft(false)
         super.onPause()
+        // An outside tap may switch to another task before ACTION_OUTSIDE is
+        // delivered. Do not leave a stale card behind that task to reopen later.
+        if (!isChangingConfigurations && !isFinishing && !closing) finish()
     }
     override fun onDestroy() {
         if (!discardConfirmed) persistDraft(false)
         disposed = true; handler.removeCallbacksAndMessages(null)
-        sizeAnimation?.cancel(); if (::card.isInitialized) window.decorView.animate().cancel()
+        sizeAnimation?.cancel(); if (::card.isInitialized) paymentWindow.decorView.animate().cancel()
+        if (::prompt.isInitialized) prompt.dismiss()
         if (Build.VERSION.SDK_INT >= 31) blurListener?.let { windowManager.removeCrossWindowBlurEnabledListener(it) }
         choiceDialog?.setOnDismissListener(null); choiceDialog?.dismiss()
         super.onDestroy()

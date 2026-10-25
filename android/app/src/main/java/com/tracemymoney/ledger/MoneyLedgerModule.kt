@@ -60,9 +60,13 @@ class MoneyLedgerModule(context: ReactApplicationContext) : NativeMoneyLedgerSpe
     override fun ingestDemo(sender: String, message: String, promise: Promise) = run(promise) {
         repository.ingest(sender, message, System.currentTimeMillis(), true).toString()
     }
-    override fun updateTransaction(id: String, recipient: String, category: String, expenseCategory: String, remarks: String, promise: Promise) = run(promise) {
-        repository.update(id, recipient, category, expenseCategory, remarks); null
+    override fun updateTransaction(id: String, recipient: String, category: String, expenseCategory: String, remarks: String, categorySelected: Boolean, promise: Promise) = run(promise) {
+        repository.update(id, recipient, category, expenseCategory, remarks, categorySelected); null
     }
+    override fun getVendorRules(demo: Boolean, promise: Promise) = run(promise) { repository.vendorRules(demo).toString() }
+    override fun editVendorRule(demo: Boolean, key: String, category: String, promise: Promise) = run(promise) { repository.editVendorRule(demo, key, category); null }
+    override fun forgetVendorRule(demo: Boolean, key: String, promise: Promise) = run(promise) { repository.forgetVendorRule(demo, key); null }
+    override fun clearVendorRules(demo: Boolean, promise: Promise) = run(promise) { repository.clearVendorRules(demo); null }
     override fun discardTransaction(id: String, promise: Promise) = run(promise) {
         repository.discard(id); PaymentNotifications.cancel(reactApplicationContext, id); null
     }

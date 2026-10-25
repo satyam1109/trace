@@ -5,6 +5,8 @@ import type {
   Transaction,
   TransactionCategory,
 } from '../types';
+import { learnVendor, normaliseVendor, isRememberable } from './vendorRules';
+import type { VendorRule } from '../types';
 import { validateManual } from './manualExpense';
 import { starterPayments } from '../demo';
 import { parseDemo } from './demoParser';
@@ -22,6 +24,46 @@ export const isBrowser = true;
 const storageKey = 'trace.browser-demo.v1';
 const planningKey = 'trace.finance.demo.v1';
 const preferencesKey = 'trace.preferences.v1';
+const vendorKey = 'trace.vendor-rules.demo.v1';
+const readVendors = (): Record<string, VendorRule> => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(vendorKey) || '{}');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+      return {};
+    return Object.fromEntries(
+      Object.entries(parsed).filter(([, rule]) => {
+        const value = rule as VendorRule;
+        return (
+          value &&
+          typeof value.name === 'string' &&
+          typeof value.key === 'string' &&
+          typeof value.category === 'string'
+        );
+      }),
+    ) as Record<string, VendorRule>;
+  } catch {
+    return {};
+  }
+};
+const writeVendors = (rules: Record<string, VendorRule>) =>
+  localStorage.setItem(vendorKey, JSON.stringify(rules));
+function remembered(name: string) {
+  const rules = readVendors(),
+    key = normaliseVendor(name);
+  const rule = Object.hasOwn(rules, key) ? rules[key] : undefined;
+  return rule && isRememberable(rule.category, readFinance().categories)
+    ? rule.category
+    : undefined;
+}
+function learn(tx: Transaction, selected: boolean) {
+  const rules = readVendors();
+  const next = learnVendor(rules, tx, selected, readFinance().categories);
+  if (next !== rules) {
+    writeVendors(next);
+    tx.categorySource = 'manual';
+  }
+}
+
 const readFinance = () =>
   normaliseFinance(JSON.parse(localStorage.getItem(planningKey) || '{}'));
 const readPreferences = (): Preferences => ({
@@ -108,8 +150,35 @@ const write = (items: Transaction[]) =>
   localStorage.setItem(storageKey, JSON.stringify(items));
 
 export const ledger = {
+  async getVendorRules(_demo: boolean): Promise<VendorRule[]> {
+    return Object.values(readVendors());
+  },
+  async editVendorRule(_demo: boolean, key: string, category: ExpenseCategory) {
+    if (!isRememberable(category, readFinance().categories))
+      throw Error('Choose an existing expense category.');
+    const rules = readVendors();
+    if (!Object.hasOwn(rules, key))
+      throw Error('Vendor rule no longer exists.');
+    writeVendors({ ...rules, [key]: { ...rules[key], category } });
+  },
+  async forgetVendorRule(_demo: boolean, key: string) {
+    const rules = readVendors();
+    delete rules[key];
+    writeVendors(rules);
+  },
+  async clearVendorRules(_demo: boolean) {
+    localStorage.removeItem(vendorKey);
+  },
   async saveFinance(_demo: boolean, state: FinanceState) {
     localStorage.setItem(planningKey, JSON.stringify(state));
+    const rules = readVendors();
+    const kept = Object.fromEntries(
+      Object.entries(rules).filter(([, rule]) =>
+        isRememberable(rule.category, state.categories),
+      ),
+    );
+    if (Object.keys(kept).length !== Object.keys(rules).length)
+      writeVendors(kept);
   },
   async savePreferences(preferences: Preferences) {
     localStorage.setItem(
@@ -117,7 +186,7 @@ export const ledger = {
       JSON.stringify({ ...preferences, appLock: false }),
     );
   },
-  async editTransaction(input: Transaction) {
+  async editTransaction(input: Transaction, categorySelected = false) {
     const rows = restore();
     const old = rows.find(t => t.id === input.id);
     if (!old) throw Error('Entry no longer exists.');
@@ -142,23 +211,22 @@ export const ledger = {
         repayments.some(r => r.at < (input.transactionAt || input.receivedAt)))
     )
       throw Error('Keep the repaid principal and original lending date.');
-    write(
-      rows.map(t =>
-        t.id === input.id
-          ? {
-              ...t,
-              ...input,
-              source: t.source,
-              currency: t.currency || 'INR',
-              demo: true,
-              confirmed: true,
-            }
-          : t,
-      ),
-    );
+    const edited: Transaction = {
+      ...old,
+      ...input,
+      source: old.source,
+      currency: old.currency || 'INR',
+      demo: true,
+      confirmed: true,
+      vendorName:
+        old.vendorName ?? (old.source === 'sms' ? old.recipient : undefined),
+    };
+    learn(edited, categorySelected);
+    write(rows.map(t => (t.id === input.id ? edited : t)));
   },
   async resetAllData() {
     write([]);
+    localStorage.removeItem(vendorKey);
     localStorage.setItem(planningKey, JSON.stringify(initialFinance()));
     localStorage.setItem(preferencesKey, JSON.stringify(initialPreferences));
   },
@@ -192,6 +260,15 @@ export const ledger = {
       location: null,
       locationStatus: 'manual',
     };
+    const match =
+      input.category === 'expense' && !input.categorySelected
+        ? remembered(transaction.recipient)
+        : undefined;
+    if (match) {
+      transaction.expenseCategory = match;
+      transaction.categorySource = 'vendor';
+    }
+    learn(transaction, !!input.categorySelected);
     write([transaction, ...restore()]);
     return transaction;
   },
@@ -231,7 +308,9 @@ export const ledger = {
       autoSaveAt: now + 5_000,
       confirmed: false,
       category: 'expense',
-      expenseCategory: 'uncategorised',
+      expenseCategory: remembered(parsed.recipient) || 'uncategorised',
+      vendorName: parsed.recipient,
+      categorySource: remembered(parsed.recipient) ? 'vendor' : 'uncategorised',
       remarks: '',
       demo: true,
       location: null,
@@ -246,26 +325,28 @@ export const ledger = {
     category: TransactionCategory,
     expenseCategory: ExpenseCategory,
     remarks: string,
+    categorySelected = false,
   ) {
     if (!['expense', 'lent', 'income', 'transfer'].includes(category)) {
       throw new Error('Choose a supported transaction category.');
     }
     if (!isExpenseCategory(expenseCategory))
       throw new Error('Choose a supported expense category.');
-    write(
-      restore().map(item =>
-        item.id === id
-          ? {
-              ...item,
-              recipient: recipient.trim().slice(0, 100),
-              category,
-              expenseCategory,
-              remarks: remarks.trim().slice(0, 500),
-              confirmed: true,
-            }
-          : item,
-      ),
-    );
+    const rows = restore();
+    const old = rows.find(item => item.id === id);
+    if (!old) return;
+    const tx: Transaction = {
+      ...old,
+      recipient: recipient.trim().slice(0, 100),
+      category,
+      expenseCategory,
+      remarks: remarks.trim().slice(0, 500),
+      confirmed: true,
+      vendorName:
+        old.vendorName ?? (old.source === 'sms' ? old.recipient : undefined),
+    };
+    learn(tx, categorySelected);
+    write(rows.map(item => (item.id === id ? tx : item)));
   },
   async discardTransaction(id: string) {
     write(restore().filter(item => item.id !== id));

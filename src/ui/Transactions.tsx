@@ -38,27 +38,26 @@ import {
 } from './components';
 import { useFinance } from './store';
 import { useTheme, ui } from './theme';
+import { GlassPressable } from './GlassPressable';
 export function TransactionRow({
   item,
   onPress,
+  glass = false,
 }: {
   item: Transaction;
   onPress: () => void;
+  glass?: boolean;
 }) {
   const { finance } = useFinance(),
-    { colors: c } = useTheme();
+    { colors: c, dark } = useTheme();
   const cat = categoryFor(finance, item.expenseCategory),
     income = item.category === 'income';
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Edit ${item.recipient || 'payment'} ${formatMoney(
-        item.amountPaise,
-        currencyOf(item),
-      )}`}
-      onPress={onPress}
-      style={[ui.setting, { borderColor: c.line }]}
-    >
+  const label = `Edit ${item.recipient || 'payment'} ${formatMoney(
+    item.amountPaise,
+    currencyOf(item),
+  )}`;
+  const content = (
+    <>
       <View style={[ui.iconBox, { backgroundColor: c.subtle }]}>
         <Icon
           name={item.category === 'lent' ? 'lend' : cat.icon}
@@ -85,17 +84,39 @@ export function TransactionRow({
             : cat.name}
         </Copy>
       </View>
+    </>
+  );
+  return glass ? (
+    <GlassPressable
+      label={label}
+      onPress={onPress}
+      light={!dark}
+      radius={18}
+      contentStyle={[ui.setting, { borderColor: c.line }]}
+    >
+      {content}
+    </GlassPressable>
+  ) : (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={[ui.setting, { borderColor: c.line }]}
+    >
+      {content}
     </Pressable>
   );
 }
 export function TransactionEditor({
   item,
   type = 'expense',
+  initialCategorySelected = false,
   onClose,
   onSaved,
 }: {
   item?: Transaction;
   type?: TransactionCategory;
+  initialCategorySelected?: boolean;
   onClose: () => void;
   onSaved?: () => void;
 }) {
@@ -111,6 +132,9 @@ export function TransactionEditor({
       item?.expenseCategory ||
         (type === 'income' ? 'income_salary' : 'uncategorised'),
     );
+  const [categorySelected, setCategorySelected] = useState(
+    initialCategorySelected,
+  );
   const initial = new Date(item ? transactionTime(item) : Date.now()),
     pad = (v: number) => String(v).padStart(2, '0');
   const [date, setDate] = useState(
@@ -137,16 +161,19 @@ export function TransactionEditor({
         : category
     ) as ExpenseCategory;
     if (item)
-      await edit({
-        ...item,
-        amountPaise,
-        recipient,
-        remarks,
-        category: kind,
-        expenseCategory,
-        method,
-        transactionAt: occurredAt,
-      });
+      await edit(
+        {
+          ...item,
+          amountPaise,
+          recipient,
+          remarks,
+          category: kind,
+          expenseCategory,
+          method,
+          transactionAt: occurredAt,
+        },
+        categorySelected,
+      );
     else
       await create({
         amount,
@@ -158,6 +185,7 @@ export function TransactionEditor({
         currency,
         occurredAt,
         demo,
+        categorySelected,
       });
     onSaved?.();
   }
@@ -185,6 +213,7 @@ export function TransactionEditor({
         value={kind}
         onChange={v => {
           setKind(v);
+          setCategorySelected(false);
           setCategory(v === 'income' ? 'income_salary' : 'uncategorised');
         }}
         options={[
@@ -221,12 +250,21 @@ export function TransactionEditor({
       <Select
         label="Category"
         value={category}
-        onChange={setCategory}
+        onChange={v => {
+          setCategory(v);
+          setCategorySelected(true);
+        }}
         options={(kind === 'income'
           ? incomeCategories
           : allCategories(finance)
         ).map(c => ({ value: c.id, label: c.name }))}
       />
+      {kind === 'expense' ? (
+        <Copy muted size={12}>
+          Choosing a category remembers it for future payments to this vendor.
+          You can manage this in Settings.
+        </Copy>
+      ) : null}
       <Select
         label="Payment method"
         value={method}

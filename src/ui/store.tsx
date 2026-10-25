@@ -31,7 +31,7 @@ export type FinanceStore = {
   saveFinance: (fn: (state: FinanceState) => FinanceState) => Promise<void>;
   savePreferences: (patch: Partial<Preferences>) => Promise<void>;
   create: (input: ManualExpense) => Promise<Transaction>;
-  edit: (input: Transaction) => Promise<void>;
+  edit: (input: Transaction, categorySelected?: boolean) => Promise<void>;
   discard: (id: string) => Promise<void>;
   reset: () => Promise<void>;
 };
@@ -158,7 +158,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         });
       }),
     create: input => perform(() => ledger.createManual(input)),
-    edit: input => perform(() => ledger.editTransaction(input)),
+    edit: (input, categorySelected) =>
+      perform(() => ledger.editTransaction(input, categorySelected)),
     discard: id => perform(() => ledger.discardTransaction(id)),
     reset: () =>
       perform(async () => {

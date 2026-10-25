@@ -222,20 +222,27 @@ expect(until(lambda: not popup_visible(), 13), "Reported HDFC card payment remai
 try:
     adb("shell", "appops", "set", PACKAGE, "SYSTEM_ALERT_WINDOW", "ignore")
     cold_background()
+    before_fallback_count = int(diagnostics().get("receivedCount", 0))
     incoming("VM-HDFCBK", f"A/c XX4821 debited by INR 12.34 to Smoke Fallback via UPI. Ref {refs[3]}.")
     fallback_id = identity("HDFC Bank", "4821", refs[3], 1234)
     expect(until(lambda: rows().get(fallback_id) == 0), "Capture still works with floating popup permission disabled")
+    # Saving precedes notification creation. Keep permission denied until this
+    # specific receive has finished, rather than racing the persist-first path.
+    expect(until(lambda: int(diagnostics().get("receivedCount", 0)) == before_fallback_count + 1
+                 and diagnostics().get("lastResult") == "saved"),
+           "Fallback receiver completes while floating popup permission remains disabled")
     expect(not popup_visible(), "No floating popup is opened without overlay permission")
-    notification = adb("shell", "dumpsys", "notification", "--noredact")
     notification_id = 0
     for character in fallback_id:
         notification_id = (31 * notification_id + ord(character)) & 0xFFFFFFFF
     if notification_id >= 0x80000000:
         notification_id -= 0x100000000
-    records = notification.split("NotificationRecord(")
-    expect(any(f"pkg={PACKAGE} " in record and f" id={notification_id} " in record
-               and "Payment recorded privately" in record
-               and "vis=SECRET" in record for record in records),
+    def has_fallback_notification():
+        records = adb("shell", "dumpsys", "notification", "--noredact").split("NotificationRecord(")
+        return any(f"pkg={PACKAGE} " in record and f" id={notification_id} " in record
+                   and "Payment recorded privately" in record
+                   and "vis=SECRET" in record for record in records)
+    expect(until(has_fallback_notification),
            "The new fallback payment has its own private notification")
 finally:
     adb("shell", "appops", "set", PACKAGE, "SYSTEM_ALERT_WINDOW", "allow")

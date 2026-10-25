@@ -28,8 +28,8 @@ object PaymentNotifications {
             })
         }
         val locked = LedgerRepository.get(context).preferences().optBoolean("appLock", false)
-        val intent = if (locked) Intent(context, MainActivity::class.java) else Intent(context, PaymentPromptActivity::class.java).putExtra("transactionId", id)
-        val pending = PendingIntent.getActivity(context, id.hashCode(), intent,
+        val intent = if (locked) Intent(context, MainActivity::class.java) else PaymentPromptActivity.launchIntent(context, id)
+        val pending = PendingIntent.getActivity(context, id.hashCode(), Intent(intent).putExtra("userInitiated", true),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val canNotify = Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(context,
             Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
@@ -45,7 +45,7 @@ object PaymentNotifications {
         }
         if (!locked && Settings.canDrawOverlays(context) && !context.getSystemService(android.app.KeyguardManager::class.java).isKeyguardLocked) {
             Handler(Looper.getMainLooper()).post {
-                try { context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)) }
+                try { context.startActivity(intent) }
                 catch (_: Exception) { /* Notification and saved record remain available. */ }
             }
         }

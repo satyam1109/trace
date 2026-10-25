@@ -1,9 +1,10 @@
+import { compareMonths as comparison } from '../src/finance/analytics';
 import {
   addRepayment,
   allocated,
   budgetWarnings,
-  comparison,
   currencyOf,
+  dailySummary,
   initialFinance,
   monthPlan,
   outstanding,
@@ -40,6 +41,44 @@ beforeEach(() => {
   jest.setSystemTime(new Date(2026, 9, 23, 12));
 });
 afterEach(() => jest.useRealTimers());
+test('daily spending respects local midnight and excludes other transaction types and currencies', () => {
+  const at = (day: number, hour = 0, minute = 0) =>
+    new Date(2026, 9, day, hour, minute).getTime();
+  const rows = [
+    tx({ receivedAt: at(23), amountPaise: 1234 }),
+    tx({ receivedAt: at(23, 23, 59), amountPaise: 2500 }),
+    tx({ receivedAt: at(22, 23, 59) }),
+    tx({ receivedAt: at(24) }),
+    tx({ receivedAt: at(23), category: 'income' }),
+    tx({ receivedAt: at(23), category: 'lent' }),
+    tx({ receivedAt: at(23), category: 'transfer' }),
+    tx({ receivedAt: at(23), currency: 'USD' }),
+  ];
+  expect(dailySummary(rows, 'INR', new Date(2026, 9, 23))).toEqual({
+    spent: 3734,
+    count: 2,
+  });
+  expect(dailySummary(rows, 'USD', new Date(2026, 9, 23))).toEqual({
+    spent: 10000,
+    count: 1,
+  });
+});
+test('daily spending uses the chosen payment date rather than the entry creation date', () => {
+  const rows = [
+    tx({
+      receivedAt: new Date(2026, 9, 23).getTime(),
+      transactionAt: new Date(2026, 9, 22).getTime(),
+    }),
+  ];
+  expect(dailySummary(rows, 'INR', new Date(2026, 9, 23))).toEqual({
+    spent: 0,
+    count: 0,
+  });
+  expect(dailySummary(rows, 'INR', new Date(2026, 9, 22))).toEqual({
+    spent: 10000,
+    count: 1,
+  });
+});
 test('income, consumption, lending and transfers stay financially distinct', () => {
   const rows = [
     tx(),
@@ -158,7 +197,7 @@ test('goal allocations are independent of the transaction ledger', () => {
   expect(allocated(s, 'g')).toBe(700000);
   expect(summary([tx()], '2026-10', 'INR').spent).toBe(10000);
 });
-test('month comparison uses matching dates and excludes later previous-month payments', () => {
+test('month comparison includes the whole previous month and the target through today', () => {
   const rows = [
     tx({ amountPaise: 20000, receivedAt: new Date(2026, 9, 20).getTime() }),
     tx({
@@ -175,9 +214,9 @@ test('month comparison uses matching dates and excludes later previous-month pay
   const c = comparison(rows, '2026-10', 'INR', new Date(2026, 9, 23));
   expect(c).toMatchObject({
     current: 20000,
-    previous: 10000,
+    previous: 100000,
     days: 23,
-    delta: 10000,
-    percent: 100,
+    delta: -80000,
+    percent: -80,
   });
 });

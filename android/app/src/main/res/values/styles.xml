@@ -9,8 +9,26 @@
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
-    <style name="PaymentPromptTheme" parent="android:style/Theme.Material.Light.Dialog.NoActionBar">
+    <style name="PaymentPromptTheme" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+
+    <style name="PaymentCardTheme" parent="android:style/Theme.Material.Light.Dialog.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- Only animate the bottom card, never a full-screen app launch. -->
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
         <item name="android:colorAccent">@color/trace_navy</item>

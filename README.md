@@ -2,7 +2,9 @@
 
 An Android-first, offline money tracker with automatic bank-debit SMS capture, manual expense/income entries, budgets, savings goals and lending. The React Native UI also runs as an explicitly labelled browser demonstration.
 
-Current preview: **0.2.0 / build 12**. Verified with 204 JavaScript unit tests, 191 native parser tests, 15 browser flows and emulator checks for database migration, finance editors, SMS capture, popup motion/timing and location. The 1→2 database upgrade preserved all 213 existing encrypted synthetic records. The Home screen is graph-free; spending charts live in Analytics. See [the UX v2 implementation notes](docs/ux/UX_V2_IMPLEMENTATION.md).
+Current preview: **0.2.4 / build 16**. Analytics now has navy Overview, Categories and Compare views, with interactive trends, category/vendor drill-down and full-baseline-month comparisons. See [Analytics implementation](docs/ux/ANALYTICS_V3.md). Vendor categories are remembered after an explicit selection; repeat-payment popups keep appearing with the category preselected. Manage or forget rules in Settings → Remembered vendors. See [vendor memory](docs/VENDOR_MEMORY.md). The navy dashboard now separates today’s spend from monthly Income and Expense, combines budget and savings setup, and moves rounded Recent activity lower down. Cards provide glass-style press feedback and respect reduced motion. See [dashboard implementation](docs/ux/NAVY_DASHBOARD.md). The payment popup retains its isolated task, preserving the phone Home screen or the app already in use behind it; see [popup behaviour](docs/PAYMENT_POPUP.md).
+
+The preceding UX v2 release was verified with 204 JavaScript unit tests, 191 native parser tests, 15 browser flows and emulator checks for database migration, finance editors, SMS capture, popup motion/timing and location. The 1→2 database upgrade preserved all 213 existing encrypted synthetic records. The Home screen is graph-free; spending charts live in Analytics. See [the UX v2 implementation notes](docs/ux/UX_V2_IMPLEMENTATION.md).
 
 ## Run the browser demo
 
@@ -40,12 +42,12 @@ The current release variant is signed with the template **debug key for local te
 ## Included
 
 - Five-tab navigation: Home / History / + Add / Analytics / Settings. Clear **Manage budgets** and **Savings goals** shortcuts on Home.
-- Graph-free Home with recorded expenses, income, monthly surplus, budget remaining, category summaries and recent entries. Missing income is shown as not recorded.
+- Graph-free navy Home with today’s spend, monthly Income and Expense, budget remaining, an inset savings-goal shortcut and rounded recent activity. Missing income is shown as not recorded. Monthly surplus lives in Savings; detailed category insights live in Analytics.
 - Manual expense/income/lending/transfer entries, editable amount/date/time/method/category/remarks, history search, date/category/type/method filters and date/amount sorting.
 - Built-in expense and income categories, custom expense categories, explicit cash/UPI/debit-card/credit-card/bank labels. Older generic card alerts stay unspecified.
 - Monthly overall/category budgets, optional future-month defaults, historical budgets, utilisation and overspending states.
 - Local budget notifications at 70%, 90% and 100%, threshold deduplication, overall limit alerts, and configurable in-app warnings.
-- Daily/weekly/monthly spending, category distribution, cash flow, budget vs actual, matching-date month comparisons, date-range filtering and transaction drill-down. Charts use recorded data.
+- Analytics Overview / Categories / Compare with daily/weekly/monthly trend exploration, a larger category donut, vendor detail, cash flow and budget disclosures, date-range filtering and scoped transaction drill-down. Compare uses a full baseline month against target days 1–today’s day number; the day counts are deliberately independent. Charts use recorded data.
 - Monthly savings targets, goals, contributions and contribution/savings history. Allocations do not create another expense.
 - Lending outstanding/returned views, partial/full repayments and deletion safeguards. Repayments are separate from income.
 - Light / Dark / System themes, local profile, four currencies with separate totals (no currency conversion), and Android biometric/device-credential app lock.
@@ -53,10 +55,11 @@ The current release variant is signed with the template **debug key for local te
 - Native SMS_RECEIVED BroadcastReceiver protected by BROADCAST_SMS.
 - Kotlin templates for selected INR debit and card-spend formats across 19 bank/issuer profiles and 40 exact sender tokens, generated from a shared registry.
 - Integer-paise amount parsing; missing debit amounts do not fall back to balances.
-- Room/SQLite schema 2 with AES-GCM-encrypted transaction and planning payloads, Android Keystore keys, and a non-destructive schema-1 upgrade migration.
+- Room/SQLite schema 3 with AES-GCM-encrypted transaction, planning and vendor-rule payloads, Android Keystore keys, indexed keyed vendor lookups, and non-destructive schema 1→2→3 migrations.
 - Native payment dialog and privacy-preserving notification fallback.
 - Confirmation before discarding an individual payment, including from the native SMS popup. Mobile transaction editing fills the screen width with internal content padding.
 - Persist-first behaviour: a transaction is written before a prompt is attempted. Ignoring or dismissing the prompt retains it. The five-second countdown closes the UI; editing resets it to ten seconds from the latest interaction. Swipe up or tap the compact summary to reveal optional remarks/category and Save; saving does not depend on a background timer.
+- Remembered vendor categories learned only from manual selections, with exact name matching, preselected popups and edit/forget/clear controls. No learning from ignored or Uncategorized payments.
 - Separate real and sample workspaces, explicit permission status, pause detection and delete controls.
 
 The native module owns the database. React Native calls it through a code-generated TurboModule. Real SMS capture, parsing and persistence do not require the React Native runtime to be active. The browser parser is a separate demonstration implementation and is never used for actual SMS capture.
@@ -181,3 +184,8 @@ compact state leaves the screen undimmed and can be dismissed immediately while
 keeping the payment. Android supports a glass-style surface with native blur and
 an opaque fallback. The five/ten-second save behaviour remains in place. See
 [popup behaviour and verification](docs/PAYMENT_POPUP.md).
+
+
+Build 13 was verified on the isolated AOSP emulator with 191 native unit tests, 46 popup checks, 9 blur-fallback checks and 62 SMS replay checks. Device-specific validation on the Nothing phone remains to be done after installation.
+
+Build 13 fixes automatic payment popups bringing the Trace homepage forward. The native editor now has no launcher-task affinity and uses an isolated, transaction-specific launch intent for automatic alerts and notification taps. The compact bottom-card animation and five/ten-second behaviour remain. No database, parser or SMS permission change is needed.

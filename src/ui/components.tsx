@@ -56,6 +56,7 @@ export function Amount({
   color,
   hidden = false,
   label,
+  fit = false,
 }: {
   value: number;
   currency?: Currency;
@@ -63,11 +64,15 @@ export function Amount({
   color?: string;
   hidden?: boolean;
   label?: string;
+  fit?: boolean;
 }) {
   const { colors: c } = useTheme();
   return (
     <Text
       accessibilityLabel={label}
+      numberOfLines={fit ? 1 : undefined}
+      adjustsFontSizeToFit={fit}
+      minimumFontScale={0.5}
       style={{
         fontSize: size,
         lineHeight: Math.ceil(size * 1.25),
@@ -289,10 +294,14 @@ export function Chip({
   label,
   onPress,
   selected = false,
+  style,
+  color,
 }: {
   label: string;
   onPress?: () => void;
   selected?: boolean;
+  style?: StyleProp<ViewStyle>;
+  color?: string;
 }) {
   const { colors: c } = useTheme();
   return (
@@ -302,9 +311,13 @@ export function Chip({
       accessibilityState={{ selected }}
       onPress={onPress}
       disabled={!onPress}
-      style={[ui.chip, { backgroundColor: selected ? c.navy : c.subtle }]}
+      style={[
+        ui.chip,
+        { backgroundColor: selected ? c.navy : c.subtle },
+        style,
+      ]}
     >
-      <Copy size={12} bold color={selected ? c.onNavy : c.muted}>
+      <Copy size={12} bold color={color || (selected ? c.onNavy : c.muted)}>
         {label}
       </Copy>
     </Pressable>

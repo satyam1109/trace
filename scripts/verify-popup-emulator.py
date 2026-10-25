@@ -24,7 +24,7 @@ installed = adb('shell', 'pm', 'path', PACKAGE).splitlines()[0].removeprefix('pa
 assert hashlib.sha256(adb('exec-out', 'su', '0', 'cat', installed, binary=True)).hexdigest() == sha
 original_blur = adb('shell', 'wm', 'disable-blur') if args.blur_disabled else ''
 phases = {}
-steps = ['popup-reset', 'popup-idle', 'popup-edit', 'popup-actions', 'popup-dismiss', 'popup-verify']
+steps = ['popup-task', 'popup-reset', 'popup-idle', 'popup-edit', 'popup-actions', 'popup-dismiss', 'popup-verify']
 if args.blur_disabled:
     steps = ['popup-reset', 'popup-idle', 'popup-cleanup']
 try:
@@ -44,7 +44,8 @@ try:
 finally:
     if args.blur_disabled:
         adb('shell', 'su', '0', 'wm', 'disable-blur', '0' if 'Blur enabled: true' in original_blur else '1')
-report = dict(version='0.2.0', versionCode=12, checkedAt=datetime.now(timezone.utc).isoformat(), apkSha256=sha,
+metadata = json.loads((ROOT / 'android/app/build/outputs/apk/release/output-metadata.json').read_text())['elements'][0]
+report = dict(version=metadata['versionName'], versionCode=metadata['versionCode'], checkedAt=datetime.now(timezone.utc).isoformat(), apkSha256=sha,
               device='TraceMoneyMVP AOSP ARM64 emulator', syntheticDataOnly=True, physicalDeviceVerified=False,
               initialTimeoutSeconds=5, interactionIdleTimeoutSeconds=10, blurDisabledForCheck=args.blur_disabled, phases=phases)
 name = 'popup-glass-check.json' if args.blur_disabled else 'popup-check.json'

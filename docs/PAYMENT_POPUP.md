@@ -1,4 +1,4 @@
-# Payment popup — 0.1.3 build 11
+# Payment popup — 0.2.1 build 13
 
 A supported debit is saved to the encrypted ledger before attempting any popup.
 There is no required form. This remains true with popup permission denied,
@@ -21,9 +21,26 @@ amount, method, bank, available masked suffix and recipient. Missing recipients
 show “Unknown recipient”; account digits are omitted when unavailable. Long
 recipients are capped at two lines in the compact card.
 
-The surrounding screen is undimmed and the compact Android window is non-modal.
-An outside tap or downward swipe dismisses the card immediately, retaining the
+The surrounding screen is undimmed. A transparent host behind the compact card
+receives outside taps solely to dismiss it; that tap is not forwarded to an
+underlying app or payment button. An outside tap or downward swipe dismisses the card immediately, retaining the
 payment. Ignoring it closes it after **five seconds**. No keyboard opens on entry.
+
+## Preserve the current screen
+
+The payment editor has no task affinity with the main app. Both automatic alerts
+and notification taps use the same isolated launch intent, with a transaction-
+specific URI so separate payments cannot reuse the wrong card. The task is hidden
+from Recents and removed when finished. It never brings the Trace launcher task
+forward. Home or the app already in use remains visible behind the translucent
+card and returns to the foreground when the card closes. The transparent host
+avoids Android's cross-task input sink swallowing outside taps; all visible
+content, blur and animation remain on the small dialog window. System app-launch preview
+and window transitions are disabled; the card keeps its own slide/scale animation.
+
+This follows Android's [special notification activity guidance](https://developer.android.com/develop/ui/views/notifications/navigation).
+When app lock is enabled, automatic popups remain suppressed. An explicit tap
+on a private notification can open the locked app; an automatic launch cannot.
 
 ## Expand when wanted
 
@@ -70,7 +87,9 @@ permission, dependency, networking or rejected-SMS collection was introduced.
 
 Install the release APK and matching Android test APK on the isolated TraceMoneyMVP
 AVD. `python3 scripts/verify-popup-emulator.py` refuses physical phones and checks
-compact geometry, undimmed/non-modal flags, a real upward finger gesture,
+task isolation over Android Settings and the launcher (including an existing
+Trace task, no launcher activity, and a notification tap), compact geometry,
+undimmed/non-modal flags, a real upward finger gesture,
 collapse/reopen, five/ten-second timing, automatic metadata saving, picker pause,
 Save, optional fields, lending, immediate outside/downward dismissal and encrypted
 persistence after process restart. Only its synthetic records are removed.
@@ -88,3 +107,7 @@ The SMS telephony smoke replay and location regression separately check capture
 and optional GPS capture against the delivered APK hash. Emulator results do not
 establish physical-device reliability. Update a phone with
 `adb install --no-streaming -r`; never uninstall or clear its data for this update.
+
+## Remembered vendor categories (build 15)
+
+The popup remains visible for repeat vendors. A remembered expense category is assigned before persistence, displayed in the compact summary and preselected in the expanded picker. Explicit category choices upsert vendor memory; passive saves and remarks do not. See [vendor memory](VENDOR_MEMORY.md) for storage, matching and deletion behaviour.

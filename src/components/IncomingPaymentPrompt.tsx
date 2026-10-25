@@ -30,6 +30,7 @@ import { Icon } from './Icon';
 import './popupGlass';
 
 export type PopupDetails = {
+  categorySelected: boolean;
   recipient: string;
   remarks: string;
   category: TransactionCategory;
@@ -51,6 +52,7 @@ export function IncomingPaymentPrompt({
   const { height } = useWindowDimensions();
   const [remarks, setRemarks] = useState(payment.remarks);
   const [category, setCategory] = useState(payment.category);
+  const [categorySelected, setCategorySelected] = useState(false);
   const [expenseCategory, setExpenseCategory] = useState(
     payment.expenseCategory,
   );
@@ -160,6 +162,7 @@ export function IncomingPaymentPrompt({
         category,
         expenseCategory,
         remarks,
+        categorySelected,
       );
       await dismiss();
     } catch (e) {
@@ -180,6 +183,7 @@ export function IncomingPaymentPrompt({
     category,
     expenseCategory,
     remarks,
+    categorySelected,
     dismiss,
     expand,
   ]);
@@ -325,6 +329,20 @@ export function IncomingPaymentPrompt({
                 <Text style={styles.recipient} numberOfLines={2}>
                   To {payment.recipient || 'Unknown recipient'}
                 </Text>
+                {category === 'expense' &&
+                expenseCategory !== 'uncategorised' ? (
+                  <Text
+                    accessibilityLabel="Payment category"
+                    style={styles.source}
+                  >
+                    {customCategories.find(
+                      option => option.value === expenseCategory,
+                    )?.label || expenseCategoryLabel(expenseCategory)}
+                    {payment.categorySource === 'vendor' && !categorySelected
+                      ? ' · Remembered'
+                      : ''}
+                  </Text>
+                ) : null}
               </Pressable>
             </View>
             <Animated.View
@@ -410,6 +428,9 @@ export function IncomingPaymentPrompt({
                       style={styles.input}
                     />
                     <Text style={styles.label}>Category (optional)</Text>
+                    <Text style={styles.helper}>
+                      Choosing a category remembers it for this vendor.
+                    </Text>
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel="Choose popup category"
@@ -458,6 +479,7 @@ export function IncomingPaymentPrompt({
                             }}
                             style={styles.menuItem}
                             onPress={() => {
+                              setCategorySelected(true);
                               setCategory(
                                 option.value === 'lent' ? 'lent' : 'expense',
                               );
@@ -501,6 +523,7 @@ export function IncomingPaymentPrompt({
                             remarks,
                             category,
                             expenseCategory,
+                            categorySelected,
                           })
                         }
                       >

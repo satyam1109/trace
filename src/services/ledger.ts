@@ -12,6 +12,24 @@ import type { ExpenseCategory } from '../categories';
 export const isBrowser = false;
 
 export const ledger = {
+  async getVendorRules(
+    demo: boolean,
+  ): Promise<import('../types').VendorRule[]> {
+    if (!NativeLedger) throw Error('Android module unavailable.');
+    return JSON.parse(await NativeLedger.getVendorRules(demo));
+  },
+  async editVendorRule(demo: boolean, key: string, category: ExpenseCategory) {
+    if (!NativeLedger) throw Error('Android module unavailable.');
+    await NativeLedger.editVendorRule(demo, key, category);
+  },
+  async forgetVendorRule(demo: boolean, key: string) {
+    if (!NativeLedger) throw Error('Android module unavailable.');
+    await NativeLedger.forgetVendorRule(demo, key);
+  },
+  async clearVendorRules(demo: boolean) {
+    if (!NativeLedger) throw Error('Android module unavailable.');
+    await NativeLedger.clearVendorRules(demo);
+  },
   async saveFinance(
     demo: boolean,
     state: import('../finance/model').FinanceState,
@@ -23,9 +41,11 @@ export const ledger = {
     if (!NativeLedger) throw new Error('Android module unavailable.');
     await NativeLedger.savePreferences(JSON.stringify(preferences));
   },
-  async editTransaction(input: Transaction) {
+  async editTransaction(input: Transaction, categorySelected = false) {
     if (!NativeLedger) throw new Error('Android module unavailable.');
-    await NativeLedger.editTransaction(JSON.stringify(input));
+    await NativeLedger.editTransaction(
+      JSON.stringify({ ...input, categorySelected }),
+    );
   },
   async resetAllData() {
     await NativeLedger?.resetAllData();
@@ -75,6 +95,7 @@ export const ledger = {
     category: TransactionCategory,
     expenseCategory: ExpenseCategory,
     remarks: string,
+    categorySelected = false,
   ) {
     if (!NativeLedger) {
       throw new Error('Android module unavailable.');
@@ -85,6 +106,7 @@ export const ledger = {
       category,
       expenseCategory,
       remarks,
+      categorySelected,
     );
   },
   async discardTransaction(id: string) {

@@ -33,10 +33,16 @@ class LendingVerification : Instrumentation() {
             val context = targetContext
             val prefs = context.getSharedPreferences("lending.verification", 0)
             val repository = LedgerRepository.get(context)
-            if (phase == "finance-ui") {
+            if (phase == "analytics-ui") {
+                AnalyticsUiVerification.run(this) { value, name -> expect(value, name) }
+            } else if (phase.startsWith("vendor-")) {
+                VendorVerification.run(this, phase, repository) { value, name -> expect(value, name) }
+            } else if (phase == "finance-ui") {
                 FinanceUiVerification.run(this, repository) { value, name -> expect(value, name) }
             } else if (phase.startsWith("finance-")) {
                 PlanningVerification.run(this, phase, repository) { value, name -> expect(value, name) }
+            } else if (phase == "popup-task") {
+                PopupTaskVerification(this, repository) { value, name -> expect(value, name) }.run()
             } else if (phase.startsWith("popup-")) {
                 PopupVerification(this, repository) { value, name -> expect(value, name) }.run(phase)
             } else if (phase == "manual-ui") {

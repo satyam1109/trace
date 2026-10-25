@@ -6,12 +6,25 @@ import android.util.Base64
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
+import javax.crypto.Mac
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 /** Financial fields are encrypted before reaching Room. No plaintext fallback. */
 class PayloadCipher {
     private val alias = "tracemymoney.transactions.v1"
+
+    /** Keyed, workspace-separated lookup keys keep vendor names out of the index. */
+    @Synchronized fun vendorKey(name: String, demo: Boolean): String {
+        val lookupAlias = "tracemymoney.vendors.lookup.v1"
+        val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        val key = (store.getKey(lookupAlias, null) as? SecretKey) ?: KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_HMAC_SHA256, "AndroidKeyStore").apply {
+            init(KeyGenParameterSpec.Builder(lookupAlias, KeyProperties.PURPOSE_SIGN).setDigests(KeyProperties.DIGEST_SHA256).build())
+        }.generateKey()
+        return Mac.getInstance("HmacSHA256").apply { init(key) }
+            .doFinal("${if (demo) "demo" else "live"}\u0000$name".toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+    }
 
     @Synchronized private fun key(): SecretKey {
         val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }

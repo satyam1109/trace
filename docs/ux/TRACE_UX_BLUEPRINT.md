@@ -1,6 +1,10 @@
 # Trace UX blueprint — design proposal
 
-Status: UX implemented in Android preview 0.2.0 / build 12. The Figma canvas remains empty because of the MCP tool limit. See UX_V2_IMPLEMENTATION.md for delivered behaviour and verification.
+Status: the expanded UX shipped in Android preview 0.2.0 / build 12. The approved
+navy dashboard is implemented in 0.2.2 / build 14. See
+[UX v2](UX_V2_IMPLEMENTATION.md) and [dashboard implementation](NAVY_DASHBOARD.md)
+for delivered behaviour and verification. The Figma canvas remains empty because
+of the MCP tool limit. Third-party shared-expense integrations are outside scope.
 This draft covers the user's expanded feature requirements while preserving
 Trace's SMS capture, compact payment popup and lending capability. The local design screen set is a reference; the implementation keeps Home graph-free.
 
@@ -23,6 +27,7 @@ The design uses **Budget left** as the remaining amount. This is a budget metric
 
 | Display | Meaning |
 | --- | --- |
+| Spent today | Recorded consumption expenses on the device's current local calendar day, independent of the selected reporting month |
 | Spent this month | Recorded consumption expenses for the selected month, excluding lending, own transfers and card-bill repayments already represented by card purchases |
 | Income this month | Recorded income for the selected month; start with manual income entry rather than treating every incoming credit as income |
 | Saved this month | User-requested calculation: recorded income minus recorded consumption expenses. Explain that it is the month's surplus, not a verified savings-account balance |
@@ -55,21 +60,29 @@ month/year picker so users are not forced to swipe through years of history.
 
 ### Home
 
-1. Compact header: Trace, month selector, hide amounts and detection status.
-2. Hero: **Spent this month**, with same-period comparison only when enough
-   comparable history exists. Its subtle background spending trace is interactive,
-   not another competing full chart.
-3. Compact summary area: Income, Saved this month and Budget left.
-   All user-requested totals remain available without equal-sized competing cards.
-4. Overall budget: spent/limit, true utilization percentage and remaining/over amount.
-5. One actionable insight, with a link to its underlying records. Examples:
-   “Food is your largest category at 35%” or “Spending is 14% above the same dates
-   last month.” Show the comparison dates in details. Do not fabricate insights
-   when history is sparse or categories are unknown.
-6. Category summary: top categories with consistent colours and amounts; tapping
-   a category opens its breakdown and transactions.
-7. Compact entry points: savings goal progress and money owed to the user.
-8. Recent activity: five transactions, grouped by date, with a View all link.
+1. Compact header: Trace, reporting-month selector and hide amounts.
+2. Spacious, unboxed hero: **Spent today**, with the actual local date. No chart.
+3. One row with two separate rounded panels: **Income** and **Expense**, both
+   scoped to the selected month. Taps open the corresponding records.
+4. One rounded monthly-budget panel with remaining/over-budget amount, actual
+   utilization progress and a Manage action. Place the savings-goal entry point
+   inside this same panel on a quiet blue-gray inset row.
+5. Recent activity follows after generous space. Give it rounded corners and a
+   warm ivory background. Let its transactions extend below the first viewport;
+   do not shrink or crowd the upper dashboard to fit every row on screen.
+
+Use a continuous deep-navy canvas, slightly lighter dark-blue panels, muted gold
+accents, generous section spacing and approximately 28–32 dp corner radii. A tap
+may use a brief frosted highlight and gentle press animation; keep text opaque
+and legible, and respect reduced motion. The app implements layered glass-style press feedback; the browser also uses a
+CSS backdrop filter. These are visual treatments, not an Apple UI framework.
+
+Do not add external account-connect controls, sample external balances, shared-
+expense placeholders or empty integration tiles. Removing those concepts should
+leave breathing room rather than replacement widgets. Detailed category insights
+remain in Analytics. Preserve the existing lending/repayment flow with a compact
+entry point from Home or History; a group expense feature is a separate future
+project, not part of this dashboard revision.
 
 Budget and savings setup are optional, compact calls to action until configured.
 Do not show zero-budget progress or fake comparisons as if setup were complete.
@@ -121,11 +134,9 @@ preferences remain distinct; disabling alerts never disables transaction capture
 Organise the requested graphs into three connected views, rather than a single
 long stack of charts:
 
-- **Spending:** a time-series chart with daily/weekly/monthly aggregation, category
-  donut and readable rows, highest category, highest day and average daily spend.
-- **Cash flow:** income-versus-expense bars and budget-versus-actual category bars.
-- **Compare:** current/previous month, equivalent elapsed dates by default when the
-  current month is incomplete, category changes and configurable date ranges.
+- **Overview:** daily/weekly/monthly trend exploration, one largest-category insight, compact category rows, highest day and daily average.
+- **Categories:** a larger segmented donut, ranked category rows, vendor details and selected-range payment drill-down. Payment-method summaries are expandable.
+- **Compare:** a full, manually selectable baseline calendar month versus the target month from day 1 through today's day number (capped at the target month's length). This explicitly replaces matched elapsed-date comparison. Both ranges are labelled. Category changes sort by rupee impact. Income/surplus and budget-vs-actual detail remain expandable.
 
 Every chart needs a clear period, units, labels, accessible values and a useful tap
 interaction. Selecting a category or point reveals its amount/date and the records
@@ -147,6 +158,10 @@ amount opens a people/transaction list with outstanding and returned filters.
 Person detail supports original loans, optional due dates, partial repayments and
 Mark returned. Confirmed repayments reduce outstanding principal and retain an
 audit trail. Incoming credit SMS alone must not silently settle a loan.
+
+Future only: a first-party group expense and splitting feature may be considered
+later. No implementation, group balances, new data model or dashboard tile is
+included in the current scope. Existing individual lending is unchanged.
 
 ### Settings and profile
 
@@ -206,7 +221,7 @@ screen board. Do not call a screenshot collection an editable Figma file.
 | History | List, search results, no results, filters/sort sheet |
 | Add and detail | Add expense, add income, transaction detail/edit, custom category picker/create, delete confirmation |
 | Budgets | Overview, overall budget edit, category budget edit/detail, historical month, threshold warning |
-| Analytics | Spending, cash flow, comparison, date picker, selected chart point/category, insufficient history |
+| Analytics | Overview, Categories, Compare, date picker, selected chart point/category, insufficient history |
 | Savings | Overview/history, goal create/edit, goal detail/contribution, delete confirmation |
 | Lending | Outstanding/returned list, person detail, partial repayment/mark returned |
 | Capture | Compact payment card, expanded editor, category picker, save/discard states |

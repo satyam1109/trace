@@ -17,6 +17,7 @@ import {
   Sheet,
 } from './components';
 import { useFinance } from './store';
+import { VendorSettings } from './VendorSettings';
 import { useTheme, ui } from './theme';
 const diagnostics: Record<string, string> = {
   never_received: 'No incoming SMS checked yet.',
@@ -131,6 +132,7 @@ export function Settings({
         </Copy>
       </>
     );
+  if (section === 'vendors') return <VendorSettings />;
   if (section === 'categories') return <Categories />;
   if (section === 'alerts')
     return (
@@ -420,8 +422,9 @@ export function Settings({
             Saved on this device
           </Copy>
           <Copy muted>
-            Transactions, budgets, goals and repayments are stored locally.
-            Sensitive financial details are encrypted in the Android database.
+            Transactions, budgets, goals, repayments and vendor rules are stored
+            locally. Sensitive financial details are encrypted in the Android
+            database.
           </Copy>
         </Card>
         <Setting
@@ -494,6 +497,12 @@ export function Settings({
         onPress={() => onNavigate('categories')}
       />
       <Setting
+        title="Remembered vendors"
+        subtitle="Automatic categories for repeat payments"
+        icon="bag"
+        onPress={() => onNavigate('vendors')}
+      />
+      <Setting
         title="Budget defaults"
         subtitle="Monthly and category limits"
         icon="wallet"
@@ -531,7 +540,7 @@ export function Settings({
         onPress={() => onNavigate('data')}
       />
       <Copy muted size={12}>
-        Trace · Offline money tracking · v0.2.0
+        Trace · Offline money tracking · v0.2.4
       </Copy>
     </>
   );
@@ -547,7 +556,7 @@ function ResetConfirmation({
   return (
     <Confirm
       title="Reset all local data?"
-      copy="This permanently removes transactions, budgets, goals, lending history and preferences. Your bank payments and SMS remain unchanged."
+      copy="This permanently removes transactions, budgets, goals, lending history, remembered vendors and preferences. Your bank payments and SMS remain unchanged."
       label="Reset local data"
       onClose={onClose}
       onConfirm={async () => {

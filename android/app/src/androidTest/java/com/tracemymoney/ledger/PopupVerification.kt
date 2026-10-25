@@ -42,8 +42,7 @@ class PopupVerification(private val test: Instrumentation, private val repositor
         return item
     }
     private fun open(record: JSONObject): Activity {
-        val activity = test.startActivitySync(Intent(test.targetContext, PaymentPromptActivity::class.java)
-            .putExtra("transactionId", record.getString("id")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        val activity = test.startActivitySync(PaymentPromptActivity.launchIntent(test.targetContext, record.getString("id")))
         check(until { find("Show payment details") != null }) { "Compact payment summary did not render" }
         return activity
     }
@@ -74,7 +73,7 @@ class PopupVerification(private val test: Instrumentation, private val repositor
                     expect(find("Payment remarks") == null && find("Choose category") == null, "Compact summary hides optional fields until the user expands it")
                     val bounds = Rect(); find("Show payment details")!!.getBoundsInScreen(bounds)
                     expect(bounds.top > test.targetContext.resources.displayMetrics.heightPixels / 2 && bounds.height() < test.targetContext.resources.displayMetrics.density * 280, "Initial native card is compact and anchored near the bottom")
-                    expect(activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND == 0 && activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL != 0, "Compact native card leaves the surrounding screen undimmed and non-modal")
+                    expect((activity as PaymentPromptActivity).paymentWindow.attributes.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND == 0 && (activity as PaymentPromptActivity).paymentWindow.attributes.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL != 0, "Compact native card leaves the surrounding screen undimmed and non-modal")
                     Thread.sleep(3500)
                     expect(!activity.isFinishing, "An untouched popup remains visible before five seconds")
                     expect(until(3000) { activity.isFinishing } && SystemClock.elapsedRealtime() - started < 6500, "An untouched native popup closes at five seconds without input")
@@ -89,7 +88,7 @@ class PopupVerification(private val test: Instrumentation, private val repositor
                     Thread.sleep(1000)
                     swipeUp()
                     expect(find("Collapse payment details") != null, "An upward finger gesture expands the native payment card")
-                    expect(activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND != 0, "Expanded native editor adds a light backdrop")
+                    expect((activity as PaymentPromptActivity).paymentWindow.attributes.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND != 0, "Expanded native editor adds a light backdrop")
                     fill("Shared lunch")
                     click("Collapse payment details")
                     expect(find("Payment remarks") == null, "Tapping the header collapses the optional editor")
@@ -155,7 +154,7 @@ class PopupVerification(private val test: Instrumentation, private val repositor
                         java.io.FileInputStream(it.fileDescriptor).use { stream -> stream.readBytes() }
                     }
                     val closed = until(2000) { activity.isFinishing }; val elapsed = SystemClock.elapsedRealtime() - start
-                    check(closed && repository.find(item.getString("id")) != null) { "Outside tap closed=$closed, injection elapsed=${elapsed}ms, flags=${activity.window.attributes.flags}" }
+                    check(closed && repository.find(item.getString("id")) != null) { "Outside tap closed=$closed, injection elapsed=${elapsed}ms, flags=${(activity as PaymentPromptActivity).paymentWindow.attributes.flags}" }
                     expect(closed && elapsed < 3000, "Tapping outside closes the compact native card immediately and retains the payment")
                     val next = record(); activity = open(next)
                     Thread.sleep(400)

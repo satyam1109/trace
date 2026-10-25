@@ -18,11 +18,8 @@ import java.util.concurrent.Executors
 
 class LedgerRepository private constructor(private val context: Context) {
     val executor = Executors.newSingleThreadExecutor()
-    private val db = Room.databaseBuilder(context, LedgerDatabase::class.java, "ledger.db").addMigrations(object : Migration(1, 2) {
-        override fun migrate(database: SupportSQLiteDatabase) {
-            database.execSQL("CREATE TABLE IF NOT EXISTS `planning` (`key` TEXT NOT NULL, `payload` TEXT NOT NULL, PRIMARY KEY(`key`))")
-        }
-    }).build()
+    private val db = Room.databaseBuilder(context, LedgerDatabase::class.java, "ledger.db")
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
     private val cipher = PayloadCipher()
     private val prefs = context.getSharedPreferences("ledger.settings", Context.MODE_PRIVATE)
     var detectionEnabled: Boolean
@@ -64,12 +61,13 @@ class LedgerRepository private constructor(private val context: Context) {
             .joinToString("") { "%02x".format(it) }
         val id = if (demo) "demo-${UUID.randomUUID()}" else "sms-$hash"
         find(id)?.let { return JSONObject().put("transaction", it).put("duplicate", true).put("reason", "Already recorded") }
+        val remembered = vendorCategory(payment.recipient, demo)
         val transaction = JSONObject()
             .put("id", id).put("source", "sms").put("currency", "INR").put("amountPaise", payment.amountPaise)
             .put("bank", payment.bank).put("account", payment.account)
-            .put("method", payment.method).put("recipient", payment.recipient)
+            .put("method", payment.method).put("recipient", payment.recipient).put("vendorName", payment.recipient)
             .put("category", "expense")
-            .put("expenseCategory", "uncategorised").put("remarks", "")
+            .put("expenseCategory", remembered ?: "uncategorised").put("categorySource", if (remembered != null) "vendor" else "uncategorised").put("remarks", "")
             .put("reference", payment.reference).put("receivedAt", receivedAt)
             .put("transactionAt", JSONObject.NULL).put("autoSaveAt", receivedAt + 5_000)
             .put("confirmed", false).put("demo", demo).put("location", JSONObject.NULL)
@@ -107,26 +105,35 @@ class LedgerRepository private constructor(private val context: Context) {
             .put("remarks", input.getString("remarks").trim().take(500))
             .put("receivedAt", now).put("transactionAt", date.toLong()).put("autoSaveAt", now)
             .put("confirmed", true).put("demo", demo).put("location", JSONObject.NULL).put("locationStatus", "manual")
-        val inserted = db.transactions().insert(StoredTransaction().apply {
-            this.id = id; receivedAt = now; this.demo = demo
-            payload = cipher.encrypt(id, transaction.toString())
-        })
-        check(inserted != -1L) { "Could not save expense" }
+        val remembered = if (category == "expense" && !input.optBoolean("categorySelected")) vendorCategory(transaction.getString("recipient"), demo) else null
+        if (remembered != null) transaction.put("expenseCategory", remembered).put("categorySource", "vendor")
+        db.runInTransaction {
+            learnVendor(transaction, input.optBoolean("categorySelected"))
+            val inserted = db.transactions().insert(StoredTransaction().apply {
+                this.id = id; receivedAt = now; this.demo = demo
+                payload = cipher.encrypt(id, transaction.toString())
+            })
+            check(inserted != -1L) { "Could not save expense" }
+        }
         require(transaction.getString("currency") in setOf("INR", "USD", "EUR", "GBP")) { "Unsupported currency" }
         if (!demo) checkBudgets()
         return transaction
     }
 
-    fun update(id: String, recipient: String, category: String? = null, expenseCategory: String? = null, remarks: String? = null) {
+    fun update(id: String, recipient: String, category: String? = null, expenseCategory: String? = null, remarks: String? = null, categorySelected: Boolean = false) {
         require(category == null || category in setOf("expense", "lent", "income", "transfer")) { "Unsupported category" }
         require(expenseCategory == null || validCategory(expenseCategory)) { "Unsupported expense category" }
         val transaction = find(id) ?: return
+        preserveVendorName(transaction)
         transaction.put("recipient", recipient.trim().take(100)).put("confirmed", true)
         // A native SMS popup edits only the recipient and must preserve lending.
         if (category != null) transaction.put("category", category)
         if (expenseCategory != null) transaction.put("expenseCategory", expenseCategory)
         if (remarks != null) transaction.put("remarks", remarks.trim().take(500))
-        db.transactions().update(id, cipher.encrypt(id, transaction.toString()))
+        db.runInTransaction {
+            learnVendor(transaction, categorySelected)
+            db.transactions().update(id, cipher.encrypt(id, transaction.toString()))
+        }
         if (!transaction.optBoolean("demo")) checkBudgets()
     }
 
@@ -232,7 +239,14 @@ class LedgerRepository private constructor(private val context: Context) {
             require(r.getLong("at") in tx.optLong("transactionAt", tx.getLong("receivedAt"))..System.currentTimeMillis())
             totals[txId] = (totals[txId] ?: 0L) + r.getLong("amount"); require(totals.getValue(txId) <= tx.getLong("amountPaise")) { "Repayment exceeds outstanding amount" }
         }
-        writeDocument(if (demo) "finance.demo" else "finance.live", value)
+        db.runInTransaction {
+            writeDocument(if (demo) "finance.demo" else "finance.live", value)
+            // Category removal invalidates its rules without rewriting history.
+            for (rule in db.vendors().all(demo)) {
+                val data = JSONObject(cipher.decrypt(rule.key, rule.payload))
+                if (!rememberableCategory(data.optString("category"), demo)) db.vendors().delete(rule.key, demo)
+            }
+        }
         if (!demo) checkBudgets()
     }
     fun editTransaction(input: JSONObject) {
@@ -245,20 +259,84 @@ class LedgerRepository private constructor(private val context: Context) {
         val repayments = planning(tx.optBoolean("demo")).optJSONArray("repayments") ?: JSONArray()
         var repaid = 0L; for (i in 0 until repayments.length()) { val r = repayments.getJSONObject(i); if (r.getString("transactionId") == id) { repaid += r.getLong("amount"); require(at <= r.getLong("at")) { "Payment date cannot follow a repayment" } } }
         require(repaid == 0L || (category == "lent" && amount >= repaid)) { "Keep this as lending with at least the repaid amount" }
+        preserveVendorName(tx)
         tx.put("amountPaise", amount).put("category", category).put("expenseCategory", expenseCategory).put("method", method).put("transactionAt", at)
             .put("recipient", input.getString("recipient").trim().take(100)).put("remarks", input.getString("remarks").trim().take(500)).put("confirmed", true)
-        db.transactions().update(id, cipher.encrypt(id, tx.toString()))
+        db.runInTransaction {
+            learnVendor(tx, input.optBoolean("categorySelected"))
+            db.transactions().update(id, cipher.encrypt(id, tx.toString()))
+        }
         if (!tx.optBoolean("demo")) checkBudgets()
     }
+    private fun preserveVendorName(tx: JSONObject) {
+        // Display-name edits must not change the identity extracted from an SMS.
+        if (tx.optString("source") != "manual" && !tx.has("vendorName")) tx.put("vendorName", tx.optString("recipient"))
+    }
+    private fun rememberableCategory(category: String, demo: Boolean): Boolean {
+        if (category in expenseCategories && category != "uncategorised") return true
+        if (!category.startsWith("custom_")) return false
+        val custom = planning(demo).optJSONArray("categories") ?: return false
+        return (0 until custom.length()).any { custom.getJSONObject(it).optString("id") == category }
+    }
+    private fun vendorCategory(name: String, demo: Boolean): String? {
+        return try {
+            val normal = VendorIdentity.normalise(name)
+            if (normal.isEmpty()) return null
+            val key = cipher.vendorKey(normal, demo)
+            val stored = db.vendors().find(key) ?: return null
+            val category = JSONObject(cipher.decrypt(key, stored.payload)).getString("category")
+            category.takeIf { rememberableCategory(it, demo) }
+        } catch (_: Exception) {
+            // A damaged optional rule must not prevent the payment from being saved.
+            android.util.Log.w("Trace", "Vendor category unavailable")
+            null
+        }
+    }
+    private fun learnVendor(tx: JSONObject, selected: Boolean) {
+        if (!selected || tx.optString("category") != "expense") return
+        val demo = tx.optBoolean("demo")
+        val category = tx.optString("expenseCategory")
+        if (!rememberableCategory(category, demo)) return
+        val name = if (tx.optString("source") == "manual") tx.optString("recipient") else tx.optString("vendorName", tx.optString("recipient"))
+        val normal = VendorIdentity.normalise(name)
+        if (normal.isEmpty()) return
+        val key = cipher.vendorKey(normal, demo)
+        db.vendors().save(StoredVendor().apply {
+            this.key = key; this.demo = demo
+            payload = cipher.encrypt(key, JSONObject().put("name", name.trim().take(100)).put("category", category).toString())
+        })
+        tx.put("categorySource", "manual")
+    }
+    fun vendorRules(demo: Boolean): JSONArray = JSONArray().apply {
+        db.vendors().all(demo).forEach { put(JSONObject(cipher.decrypt(it.key, it.payload)).put("key", it.key)) }
+    }
+    fun editVendorRule(demo: Boolean, key: String, category: String) {
+        require(rememberableCategory(category, demo)) { "Choose an existing expense category" }
+        val rule = db.vendors().find(key)?.takeIf { it.demo == demo } ?: throw IllegalArgumentException("Vendor rule no longer exists")
+        val value = JSONObject(cipher.decrypt(key, rule.payload)).put("category", category)
+        rule.payload = cipher.encrypt(key, value.toString()); db.vendors().save(rule)
+    }
+    fun forgetVendorRule(demo: Boolean, key: String) { db.vendors().delete(key, demo) }
+    fun clearVendorRules(demo: Boolean) { db.vendors().clearWorkspace(demo) }
     fun checkBudgets() {
         // Optional alerts must never interrupt payment capture or its popup.
         try { BudgetAlerts.check(context, planning(false), preferences(), snapshotTransactions()) }
         catch (_: Exception) { android.util.Log.w("Trace", "Budget alert check unavailable") }
     }
     private fun snapshotTransactions(): List<JSONObject> = db.transactions().all().filter { !it.demo }.map { withCategory(JSONObject(cipher.decrypt(it.id, it.payload))) }
-    fun resetAll() { db.runInTransaction { db.transactions().clear(); db.planning().clear() }; prefs.edit().clear().commit(); SmsDiagnostics(context).clear(); context.getSharedPreferences("ledger.budgetAlerts", Context.MODE_PRIVATE).edit().clear().commit() }
+    fun resetAll() { db.runInTransaction { db.transactions().clear(); db.planning().clear(); db.vendors().clear() }; prefs.edit().clear().commit(); SmsDiagnostics(context).clear(); context.getSharedPreferences("ledger.budgetAlerts", Context.MODE_PRIVATE).edit().clear().commit() }
 
     companion object {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `planning` (`key` TEXT NOT NULL, `payload` TEXT NOT NULL, PRIMARY KEY(`key`))")
+            }
+        }
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `vendor_rules` (`key` TEXT NOT NULL, `demo` INTEGER NOT NULL, `payload` TEXT NOT NULL, PRIMARY KEY(`key`))")
+            }
+        }
         @Volatile private var instance: LedgerRepository? = null
         fun get(context: Context): LedgerRepository = instance ?: synchronized(this) {
             instance ?: LedgerRepository(context.applicationContext).also { instance = it }
