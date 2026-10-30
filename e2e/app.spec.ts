@@ -84,7 +84,7 @@ test('Home is graph-free, narrow-screen safe and exposes budget and savings shor
   await expect(
     page.getByRole('button', { name: 'View monthly expenses', exact: true }),
   ).toBeVisible();
-  await expect(page.getByText('SPENT TODAY', { exact: true })).toBeVisible();
+  await expect(page.getByText('Spent today', { exact: true })).toBeVisible();
   await expect(page.locator('svg[viewBox="0 0 330 170"]')).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: 'Savings goals', exact: true }),
@@ -636,7 +636,7 @@ test('dashboard sections drill into the right records and glass feedback respect
   await page.reload();
   await expect(
     page
-      .getByTestId('monthly-budget-card')
+      .getByTestId('savings-goal-row')
       .getByRole('button', { name: 'Savings goals', exact: true }),
   ).toBeVisible();
   const card = page.getByTestId('monthly-expense-card');
@@ -705,7 +705,14 @@ test('today total rolls over at local midnight while the monthly total stays unc
     monthly!,
   );
   await expect(
-    page.getByText('25 October 2026', { exact: true }),
+    page.getByText(
+      new Date(2026, 9, 25).toLocaleDateString('en-IN', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      }),
+      { exact: true },
+    ),
   ).toBeVisible();
 });
 

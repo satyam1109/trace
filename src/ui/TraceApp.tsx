@@ -20,7 +20,6 @@ import type { Transaction, TransactionCategory } from '../types';
 import { monthKey, monthLabel } from '../finance/model';
 import { FinanceProvider, useFinance } from './store';
 import { Theme, ui, useTheme } from './theme';
-import { dashboardColors } from './dashboardTheme';
 import { GlassMotionContext } from './GlassPressable';
 import { Button, Chip, Copy, Empty, ErrorNotice } from './components';
 import { Home } from './Home';
@@ -93,6 +92,7 @@ function WorkspaceContent() {
     [routes, setRoutes] = useState<Route[]>([{ screen: 'home' }]),
     [monthPicker, setMonthPicker] = useState(false),
     [hidden, setHidden] = useState(false),
+    [fundsExpanded, setFundsExpanded] = useState(false),
     [editor, setEditor] = useState<{
       item?: Transaction;
       type?: TransactionCategory;
@@ -150,7 +150,12 @@ function WorkspaceContent() {
     }).start();
   }, [route, month, reduceMotion, opacity]);
   useEffect(() => {
+    if (isBrowser) return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (route.screen === 'home' && fundsExpanded) {
+        setFundsExpanded(false);
+        return true;
+      }
       if (routes.length > 1 || route.screen !== 'home') {
         setRoutes(previous =>
           previous.length > 1 ? previous.slice(0, -1) : [{ screen: 'home' }],
@@ -160,7 +165,7 @@ function WorkspaceContent() {
       return false;
     });
     return () => sub.remove();
-  }, [routes.length, route.screen]);
+  }, [routes.length, route.screen, fundsExpanded]);
   const launchRoute = store.snapshot?.launchRoute;
   const launchHandlers = useRef({
     savePreferences: store.savePreferences,
@@ -185,8 +190,7 @@ function WorkspaceContent() {
       t => t.id === route.id && t.category === 'lent',
     );
   const homeScreen = route.screen === 'home';
-  const navyScreen = homeScreen || route.screen === 'analytics';
-  const chrome = navyScreen ? dashboardColors : c;
+  const chrome = c;
   const active =
     route.screen === 'history'
       ? 'History'
@@ -279,9 +283,7 @@ function WorkspaceContent() {
     );
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: chrome.bg }}>
-      <StatusBar
-        barStyle={navyScreen || dark ? 'light-content' : 'dark-content'}
-      />
+      <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
       <View
         style={{ flex: 1, width: '100%', maxWidth: 680, alignSelf: 'center' }}
       >
@@ -315,8 +317,8 @@ function WorkspaceContent() {
             style={{
               fontSize: homeScreen ? 32 : 25,
               lineHeight: 38,
-              fontWeight: '700',
-              letterSpacing: -0.7,
+              fontWeight: homeScreen ? '600' : '500',
+              letterSpacing: homeScreen ? -1.5 : -0.7,
               color: chrome.ink,
               flex: 1,
             }}
@@ -333,11 +335,10 @@ function WorkspaceContent() {
             <Chip
               label={monthLabel(month, true)}
               style={
-                navyScreen
-                  ? { backgroundColor: dashboardColors.surface }
+                homeScreen
+                  ? { backgroundColor: 'transparent', paddingHorizontal: 6 }
                   : undefined
               }
-              color={navyScreen ? dashboardColors.muted : undefined}
               onPress={() => setMonthPicker(true)}
             />
           ) : null}
@@ -363,7 +364,20 @@ function WorkspaceContent() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={ui.body}
         >
-          <Animated.View style={{ gap: 18, opacity }}>
+          <Animated.View
+            style={{
+              gap: 18,
+              opacity,
+              transform: [
+                {
+                  translateY: opacity.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [reduceMotion ? 0 : 8, 0],
+                  }),
+                },
+              ],
+            }}
+          >
             {isBrowser ? (
               <Copy color={chrome.muted} size={11}>
                 Browser preview · Sample data · {store.preferences.currency}
@@ -385,6 +399,8 @@ function WorkspaceContent() {
                 <Home
                   month={month}
                   hidden={hidden}
+                  fundsExpanded={fundsExpanded}
+                  onFundsExpandedChange={setFundsExpanded}
                   onNavigate={push}
                   onAdd={income =>
                     setEditor({ type: income ? 'income' : 'expense' })
@@ -418,7 +434,7 @@ function WorkspaceContent() {
             ) : null}
             {route.screen === 'goal' ? (
               goal ? (
-                <GoalDetails goal={goal} onDeleted={back} />
+                <GoalDetails key={goal.id} goal={goal} onDeleted={back} />
               ) : (
                 <Empty
                   title="Goal no longer exists"
@@ -450,22 +466,24 @@ function WorkspaceContent() {
               )
             ) : null}
             {settingsScreens.includes(route.screen) ? (
-              <Settings
-                key={route.screen}
-                section={route.screen}
-                onNavigate={push}
-                onPreview={preview}
-                onReset={() => {
-                  store.setDemo(isBrowser);
-                  root('home');
-                }}
-              />
+              <GlassMotionContext.Provider value={reduceMotion}>
+                <Settings
+                  key={route.screen}
+                  section={route.screen}
+                  onNavigate={push}
+                  onPreview={preview}
+                  onReset={() => {
+                    store.setDemo(isBrowser);
+                    root('home');
+                  }}
+                />
+              </GlassMotionContext.Provider>
             ) : null}
           </Animated.View>
         </ScrollView>
         <View
           style={{
-            paddingHorizontal: 20,
+            paddingHorizontal: 0,
             paddingTop: 6,
             paddingBottom: 12,
             backgroundColor: chrome.bg,
@@ -474,13 +492,12 @@ function WorkspaceContent() {
           <View
             style={{
               flexDirection: 'row',
-              height: 74,
+              minHeight: 68,
               padding: 6,
-              borderRadius: 25,
-              backgroundColor: navyScreen ? dashboardColors.bg : c.surface,
-              borderWidth: 1,
-              borderColor: navyScreen ? dashboardColors.line : c.line,
-              elevation: 4,
+              paddingHorizontal: 14,
+              backgroundColor: chrome.bg,
+              borderTopWidth: 1,
+              borderColor: c.line,
             }}
           >
             {[
@@ -512,7 +529,7 @@ function WorkspaceContent() {
                   style={{
                     width: tab.screen === 'add' ? 46 : 24,
                     height: tab.screen === 'add' ? 46 : 24,
-                    borderRadius: 24,
+                    borderRadius: tab.screen === 'add' ? 16 : 12,
                     backgroundColor:
                       tab.screen === 'add' ? chrome.gold : 'transparent',
                     alignItems: 'center',
@@ -524,20 +541,21 @@ function WorkspaceContent() {
                     size={tab.screen === 'add' ? 23 : 21}
                     color={
                       tab.screen === 'add'
-                        ? chrome.navy
+                        ? chrome.onAccent
                         : active === tab.name
                         ? chrome.goldInk
                         : chrome.muted
                     }
                   />
                 </View>
-                <Copy
-                  size={10}
-                  bold
-                  color={active === tab.name ? chrome.goldInk : chrome.muted}
-                >
-                  {tab.name}
-                </Copy>
+                {tab.screen !== 'add' ? (
+                  <Copy
+                    size={10}
+                    color={active === tab.name ? chrome.goldInk : chrome.muted}
+                  >
+                    {tab.name}
+                  </Copy>
+                ) : null}
               </Pressable>
             ))}
           </View>

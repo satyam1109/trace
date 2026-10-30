@@ -9,6 +9,7 @@ export const dashboardColors = {
   navy: '#0D2339',
   onNavy: '#F7F9FC',
   gold: '#E5BE76',
+  onAccent: '#0D2339',
   goldInk: '#E5BE76',
   goldSoft: '#2B3C48',
   danger: '#FFB4AB',

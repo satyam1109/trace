@@ -36,7 +36,10 @@ class PopupVerification(private val test: Instrumentation, private val repositor
         }))
     }
     private fun record(): JSONObject {
-        val item = repository.ingest("VM-HDFCBK", "Your A/c XX1234 debited by INR 240.00 to Example Popup via UPI. Ref ${System.nanoTime()}.", System.currentTimeMillis(), true).getJSONObject("transaction")
+        // Each fixture is a new vendor so remembered rules from an earlier
+        // test run cannot categorise a no-input capture before the test starts.
+        val marker = System.nanoTime()
+        val item = repository.ingest("VM-HDFCBK", "Your A/c XX1234 debited by INR 240.00 to Example Popup $marker via UPI. Ref $marker.", System.currentTimeMillis(), true).getJSONObject("transaction")
         val ids = prefs.getString("ids", "")!!.split(',').filter { it.isNotEmpty() } + item.getString("id")
         check(prefs.edit().putString("ids", ids.joinToString(",")).commit())
         return item

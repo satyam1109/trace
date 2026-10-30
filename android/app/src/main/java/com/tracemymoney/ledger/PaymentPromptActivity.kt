@@ -13,6 +13,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.net.Uri
 import android.graphics.Color
 import android.graphics.Typeface
@@ -81,6 +82,7 @@ class PaymentPromptActivity : Activity() {
     private var expenseCategory = "uncategorised"
     private var categorySelected = false
     private var rememberedCategory = false
+    private var darkPopup = false
     private lateinit var compactCategory: TextView
     private var choiceDialog: AlertDialog? = null
     private val options = mutableListOf(
@@ -124,7 +126,10 @@ class PaymentPromptActivity : Activity() {
         repository.executor.execute {
             try {
                 // An older notification must also honour a subsequently enabled app lock.
-                if (repository.preferences().optBoolean("appLock", false)) {
+                val preferences = repository.preferences()
+                val theme = preferences.optString("theme", "system")
+                val useDark = theme == "dark" || (theme == "system" && (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
+                if (preferences.optBoolean("appLock", false)) {
                     runOnUiThread {
                         // Only an explicit notification tap may open the locked app.
                         // An automatic alert must never bring its homepage forward.
@@ -141,18 +146,28 @@ class PaymentPromptActivity : Activity() {
                     val c = custom.getJSONObject(i); options.add(c.getString("id") to c.getString("name"))
                 }
                 runOnUiThread {
-                    if (!disposed && !isDestroyed && !isFinishing && record != null) render(record) else finish()
+                    if (!disposed && !isDestroyed && !isFinishing && record != null) { darkPopup = useDark; render(record) } else finish()
                 }
             } catch (_: Exception) { runOnUiThread { finish() } }
         }
     }
 
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
-    private fun tint(resource: Int) = getColor(resource)
+    private fun tint(resource: Int): Int {
+        val hex = when (resource) {
+        R.color.trace_navy -> if (darkPopup) "#17191C" else "#FAF9F6"
+        R.color.trace_navy_raised -> if (darkPopup) "#25282D" else "#F0EFEB"
+        R.color.trace_on_navy, R.color.trace_gold -> if (darkPopup) "#F1F0EC" else "#202329"
+        R.color.trace_on_navy_muted -> if (darkPopup) "#A5A9AF" else "#6E7279"
+        R.color.trace_danger, R.color.trace_danger_on_navy -> if (darkPopup) "#FFB4AB" else "#A54238"
+        else -> return getColor(resource)
+        }
+        return Color.parseColor(hex)
+    }
     private fun text(value: String, size: Float, color: Int = tint(R.color.trace_on_navy), bold: Boolean = false) = TextView(this).apply {
         text = value; textSize = size; setTextColor(color)
         if (bold) setTypeface(typeface, Typeface.BOLD)
-        setPadding(0, dp(6), 0, dp(6))
+        setPadding(0, dp(3), 0, dp(3))
     }
     private fun field(value: String, label: String, limit: Int) = EditText(this).apply {
         setText(value); hint = label; contentDescription = label
@@ -170,8 +185,8 @@ class PaymentPromptActivity : Activity() {
         })
     }
     private fun button(label: String, primary: Boolean = false) = Button(this).apply {
-        text = label; minimumHeight = dp(48)
-        backgroundTintList = ColorStateList.valueOf(tint(if (primary) R.color.trace_gold else R.color.trace_navy_raised))
+        text = label; minimumHeight = dp(48); isAllCaps = false
+        background = GradientDrawable().apply { setColor(tint(if (primary) R.color.trace_gold else R.color.trace_navy_raised)); cornerRadius = dp(14).toFloat() }
         setTextColor(tint(if (primary) R.color.trace_navy else R.color.trace_on_navy))
     }
 
@@ -185,7 +200,7 @@ class PaymentPromptActivity : Activity() {
         card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL; setPadding(dp(22), dp(10), dp(22), dp(18))
             background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0x0CFFFFFF, 0x00FFFFFF)).apply {
-                cornerRadius = dp(28).toFloat(); setStroke(dp(1), 0x45FFFFFF)
+                cornerRadius = dp(28).toFloat(); setStroke(dp(1), if (darkPopup) 0xFF35383D.toInt() else 0xFFE6E5E0.toInt())
             }
             clipToOutline = true; isFocusableInTouchMode = true
         }
@@ -206,14 +221,14 @@ class PaymentPromptActivity : Activity() {
         details = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL; visibility = if (expanded) View.VISIBLE else View.GONE
         }
-        summary.addView(text("trace  /  PAYMENT DETECTED", 13f, tint(R.color.trace_on_navy_muted), true))
+        summary.addView(text("trace.  /  PAYMENT DETECTED", 11f, tint(R.color.trace_on_navy_muted)))
         summary.addView(text(NumberFormat.getCurrencyInstance(Locale.forLanguageTag("en-IN"))
-            .format(record.getLong("amountPaise") / 100.0), 36f, tint(R.color.trace_gold), bold = true))
+            .format(record.getLong("amountPaise") / 100.0), 34f, tint(R.color.trace_gold)))
         val suffix = record.getString("account").takeIf { it.isNotEmpty() }?.let { " · ••$it" }.orEmpty()
-        summary.addView(text("${record.getString("method")} · ${record.getString("bank")}$suffix", 14f))
-        summary.addView(text("To ${record.optString("recipient").ifEmpty { "Unknown recipient" }}", 17f, bold = true).apply {
+        summary.addView(text("To ${record.optString("recipient").ifEmpty { "Unknown recipient" }}", 14f).apply {
             maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END
         })
+        summary.addView(text("${record.getString("method")} · ${record.getString("bank")}$suffix", 12f, tint(R.color.trace_on_navy_muted)))
         compactCategory = text("", 13f, tint(R.color.trace_gold)).apply { contentDescription = "Payment category" }
         summary.addView(compactCategory)
         countdown = text("", 13f, tint(R.color.trace_on_navy_muted))
@@ -251,6 +266,10 @@ class PaymentPromptActivity : Activity() {
         card.addView(details)
         scroll = ScrollView(this).apply { isFillViewport = false; addView(card); clipToOutline = true }
         prompt.setContentView(scroll)
+        // Hide the complete window before its first frame, including its background.
+        // Only the small card springs in; the transparent host never animates.
+        val animateEntrance = state == null && motionEnabled()
+        paymentWindow.decorView.alpha = if (animateEntrance) 0f else 1f
         prompt.show()
         if (Build.VERSION.SDK_INT >= 31) {
             blurListener = Consumer { enabled -> applyGlass(enabled) }
@@ -263,12 +282,9 @@ class PaymentPromptActivity : Activity() {
         scroll.post {
             if (!disposed && !closing) {
                 resizeSheet(false)
-                if (motionEnabled()) paymentWindow.decorView.apply {
-                    translationY = height.toFloat() + dp(24); alpha = 0f; scaleX = 0.96f; scaleY = 0.96f
-                    animate().translationY(0f).scaleX(1f).scaleY(1f).setDuration(440).setInterpolator(OvershootInterpolator(0.65f)).start()
-                    card.alpha = 0f
-                    alpha = 1f
-                    card.animate().alpha(1f).setDuration(180).setInterpolator(DecelerateInterpolator()).start()
+                if (animateEntrance) paymentWindow.decorView.apply {
+                    translationY = height.toFloat() + dp(24); scaleX = 0.98f; scaleY = 0.98f
+                    animate().translationY(0f).scaleX(1f).scaleY(1f).alpha(1f).setDuration(480).setStartDelay(0).setInterpolator(OvershootInterpolator(0.45f)).start()
                 }
             }
         }
@@ -287,8 +303,8 @@ class PaymentPromptActivity : Activity() {
         if (disposed) return
         if (Build.VERSION.SDK_INT >= 31) paymentWindow.setBackgroundBlurRadius(if (enabled) dp(28) else 0)
         paymentWindow.setBackgroundDrawable(GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-            if (enabled) intArrayOf(0xF2243653.toInt(), 0xEB17233D.toInt())
-            else intArrayOf(tint(R.color.trace_navy_raised), tint(R.color.trace_navy))).apply { cornerRadius = dp(28).toFloat() })
+            if (enabled) intArrayOf((tint(R.color.trace_navy) and 0x00FFFFFF) or 0xF5000000.toInt(), (tint(R.color.trace_navy) and 0x00FFFFFF) or 0xF0000000.toInt())
+            else intArrayOf(tint(R.color.trace_navy), tint(R.color.trace_navy))).apply { cornerRadius = dp(28).toFloat() })
     }
     private fun applyWindowMode() {
         if (expanded) {

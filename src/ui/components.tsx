@@ -57,6 +57,7 @@ export function Amount({
   hidden = false,
   label,
   fit = false,
+  weight = '700',
 }: {
   value: number;
   currency?: Currency;
@@ -65,6 +66,7 @@ export function Amount({
   hidden?: boolean;
   label?: string;
   fit?: boolean;
+  weight?: import('react-native').TextStyle['fontWeight'];
 }) {
   const { colors: c } = useTheme();
   return (
@@ -76,7 +78,7 @@ export function Amount({
       style={{
         fontSize: size,
         lineHeight: Math.ceil(size * 1.25),
-        fontWeight: '700',
+        fontWeight: weight,
         color: color || c.ink,
         letterSpacing: size >= 30 ? -1 : 0,
         fontVariant: ['tabular-nums'],
@@ -140,7 +142,7 @@ export function Button({
   style?: StyleProp<ViewStyle>;
 }) {
   const { colors: c } = useTheme();
-  const color = danger ? c.danger : secondary ? c.ink : c.navy;
+  const color = danger ? c.danger : secondary ? c.ink : c.onAccent;
   return (
     <Pressable
       accessibilityRole="button"

@@ -9,6 +9,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { glassOverlayStyle } from './glassFeedback';
+import { useTheme } from './theme';
 
 export const GlassMotionContext = createContext(true);
 /** Frosted press feedback stays behind opaque text; native uses a layered highlight. */
@@ -19,7 +20,7 @@ export function GlassPressable({
   style,
   contentStyle,
   radius = 28,
-  light = false,
+  light,
   testID,
 }: {
   children: React.ReactNode;
@@ -31,6 +32,8 @@ export function GlassPressable({
   light?: boolean;
   testID?: string;
 }) {
+  const { dark } = useTheme();
+  const lightSurface = light ?? !dark;
   const reducedMotion = useContext(GlassMotionContext);
   const scale = useRef(new Animated.Value(1)).current;
   const highlight = useRef(new Animated.Value(0)).current;
@@ -96,15 +99,15 @@ export function GlassPressable({
             {
               borderRadius: radius,
               opacity: highlight,
-              borderColor: light ? '#B3955A99' : '#DCEAFF99',
-              backgroundColor: light ? '#FFFFFF66' : '#DCEAFF13',
+              borderColor: lightSurface ? '#A7AFBA66' : '#DCEAFF66',
+              backgroundColor: lightSurface ? '#FFFFFF66' : '#DCEAFF13',
             },
           ]}
         >
           <View
             style={[
               styles.sheen,
-              { backgroundColor: light ? '#FFFFFF55' : '#FFFFFF0A' },
+              { backgroundColor: lightSurface ? '#FFFFFF55' : '#FFFFFF0A' },
             ]}
           />
         </Animated.View>

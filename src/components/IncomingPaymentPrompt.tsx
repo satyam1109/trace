@@ -24,7 +24,8 @@ import {
   type ExpenseCategory,
 } from '../categories';
 import { isBrowser, ledger } from '../services/ledger';
-import { colors } from '../theme';
+import { colors as baseColors } from '../theme';
+import { useTheme } from '../ui/theme';
 import type { Transaction, TransactionCategory } from '../types';
 import { Icon } from './Icon';
 import './popupGlass';
@@ -49,6 +50,19 @@ export function IncomingPaymentPrompt({
   onSaved: (discarded?: boolean) => void;
   onEdit: (details: PopupDetails) => void;
 }) {
+  const { colors: palette } = useTheme();
+  const colors = useMemo(
+    () => ({
+      ...baseColors,
+      primary: palette.bg,
+      primaryRaised: palette.surface,
+      accent: palette.ink,
+      onPrimary: palette.ink,
+      onPrimaryMuted: palette.muted,
+    }),
+    [palette],
+  );
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { height } = useWindowDimensions();
   const [remarks, setRemarks] = useState(payment.remarks);
   const [category, setCategory] = useState(payment.category);
@@ -65,6 +79,7 @@ export function IncomingPaymentPrompt({
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [motionReady, setMotionReady] = useState(false);
   const working = useRef(false);
   const [error, setError] = useState('');
   const offset = useRef(new Animated.Value(360)).current;
@@ -72,9 +87,16 @@ export function IncomingPaymentPrompt({
   const reveal = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     let alive = true;
-    AccessibilityInfo.isReduceMotionEnabled().then(value => {
-      if (alive) setReduceMotion(value);
-    });
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then(value => {
+        if (alive) {
+          setReduceMotion(value);
+          setMotionReady(true);
+        }
+      })
+      .catch(() => {
+        if (alive) setMotionReady(true);
+      });
     const listener = AccessibilityInfo.addEventListener(
       'reduceMotionChanged',
       setReduceMotion,
@@ -85,6 +107,7 @@ export function IncomingPaymentPrompt({
     };
   }, []);
   useEffect(() => {
+    if (!motionReady) return;
     Animated.parallel([
       reduceMotion
         ? Animated.timing(offset, {
@@ -110,7 +133,7 @@ export function IncomingPaymentPrompt({
       offset.stopAnimation();
       opacity.stopAnimation();
     };
-  }, [offset, opacity, reduceMotion]);
+  }, [offset, opacity, reduceMotion, motionReady]);
   const interact = useCallback(() => {
     const tick = Date.now();
     setNow(tick);
@@ -320,14 +343,14 @@ export function IncomingPaymentPrompt({
                 <View style={styles.handleArea}>
                   <View style={styles.handle} />
                 </View>
-                <Text style={styles.eyebrow}>trace / PAYMENT DETECTED</Text>
+                <Text style={styles.eyebrow}>trace. / PAYMENT DETECTED</Text>
                 <Text style={styles.amount}>{amount}</Text>
+                <Text style={styles.recipient} numberOfLines={2}>
+                  To {payment.recipient || 'Unknown recipient'}
+                </Text>
                 <Text style={styles.source}>
                   {payment.method} · {payment.bank}
                   {payment.account ? ` · ••${payment.account}` : ''}
-                </Text>
-                <Text style={styles.recipient} numberOfLines={2}>
-                  To {payment.recipient || 'Unknown recipient'}
                 </Text>
                 {category === 'expense' &&
                 expenseCategory !== 'uncategorised' ? (
@@ -563,120 +586,122 @@ export function IncomingPaymentPrompt({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    paddingTop: 24,
-  },
-  expandedBackdrop: { backgroundColor: '#111B3029' },
-  sheet: {
-    width: '100%',
-    maxWidth: 440,
-    borderRadius: 28,
-    overflow: 'hidden',
-    backgroundColor: colors.primary,
-    borderWidth: 1,
-    borderColor: '#FFFFFF40',
-    boxShadow: '0 16px 48px #08102033',
-  },
-  summary: { paddingHorizontal: 22, paddingTop: 8, paddingBottom: 20 },
-  handleArea: { height: 22, alignItems: 'center', justifyContent: 'center' },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 3,
-    backgroundColor: '#BBC5D588',
-  },
-  eyebrow: {
-    fontSize: 12,
-    color: colors.onPrimaryMuted,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  amount: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: colors.accent,
-    marginBottom: 10,
-  },
-  source: { fontSize: 13, color: colors.onPrimaryMuted, marginBottom: 10 },
-  recipient: { fontSize: 17, fontWeight: '600', color: colors.onPrimary },
-  reveal: { overflow: 'hidden' },
-  details: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 22,
-    paddingBottom: 18,
-    gap: 10,
-  },
-  countdown: { fontSize: 12, color: colors.onPrimaryMuted, marginBottom: 4 },
-  label: { fontSize: 13, color: colors.onPrimaryMuted },
-  input: {
-    minHeight: 62,
-    maxHeight: 110,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FFFFFF30',
-    backgroundColor: colors.primaryRaised,
-    color: colors.onPrimary,
-    fontSize: 16,
-    padding: 12,
-    textAlignVertical: 'top',
-  },
-  category: {
-    minHeight: 48,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: colors.primaryRaised,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  menu: {
-    maxHeight: 200,
-    borderRadius: 12,
-    backgroundColor: colors.primaryRaised,
-  },
-  menuItem: { minHeight: 44, padding: 12 },
-  buttonText: { color: colors.onPrimary, fontSize: 14 },
-  save: {
-    minHeight: 48,
-    borderRadius: 14,
-    backgroundColor: colors.accent,
-    flexDirection: 'row',
-    gap: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
-  saveText: { color: colors.primary, fontWeight: '600', fontSize: 14 },
-  secondary: {
-    minHeight: 48,
-    borderRadius: 12,
-    backgroundColor: colors.primaryRaised,
-    padding: 14,
-    marginTop: 12,
-    alignItems: 'center',
-  },
-  links: { flexDirection: 'row', justifyContent: 'space-between' },
-  link: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 6 },
-  danger: { color: '#FFD2CC', fontSize: 14 },
-  privacy: { color: colors.onPrimaryMuted, fontSize: 11, lineHeight: 17 },
-  title: {
-    fontSize: 22,
-    color: colors.onPrimary,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  helper: { fontSize: 14, color: colors.onPrimaryMuted, lineHeight: 21 },
-  disabled: { opacity: 0.5 },
-});
+const createStyles = (colors: typeof baseColors) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+      paddingTop: 24,
+    },
+    expandedBackdrop: { backgroundColor: '#111B3029' },
+    sheet: {
+      width: '100%',
+      maxWidth: 440,
+      borderRadius: 28,
+      overflow: 'hidden',
+      backgroundColor: colors.primary,
+      borderWidth: 1,
+      borderColor: colors.line,
+      boxShadow: '0 16px 48px #08102033',
+    },
+    summary: { paddingHorizontal: 20, paddingTop: 6, paddingBottom: 16 },
+    handleArea: { height: 22, alignItems: 'center', justifyContent: 'center' },
+    handle: {
+      width: 36,
+      height: 4,
+      borderRadius: 3,
+      backgroundColor: '#BBC5D588',
+    },
+    eyebrow: {
+      fontSize: 11,
+      color: colors.onPrimaryMuted,
+      fontWeight: '600',
+      letterSpacing: 0.5,
+      marginTop: 4,
+      marginBottom: 9,
+    },
+    amount: {
+      fontSize: 34,
+      fontWeight: '400',
+      letterSpacing: -1,
+      color: colors.accent,
+      marginBottom: 7,
+    },
+    source: { fontSize: 12, color: colors.onPrimaryMuted, marginTop: 5 },
+    recipient: { fontSize: 14, fontWeight: '500', color: colors.onPrimary },
+    reveal: { overflow: 'hidden' },
+    details: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      paddingHorizontal: 22,
+      paddingBottom: 18,
+      gap: 10,
+    },
+    countdown: { fontSize: 12, color: colors.onPrimaryMuted, marginBottom: 4 },
+    label: { fontSize: 13, color: colors.onPrimaryMuted },
+    input: {
+      minHeight: 62,
+      maxHeight: 110,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.line,
+      backgroundColor: colors.primaryRaised,
+      color: colors.onPrimary,
+      fontSize: 16,
+      padding: 12,
+      textAlignVertical: 'top',
+    },
+    category: {
+      minHeight: 48,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      backgroundColor: colors.primaryRaised,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    menu: {
+      maxHeight: 200,
+      borderRadius: 12,
+      backgroundColor: colors.primaryRaised,
+    },
+    menuItem: { minHeight: 44, padding: 12 },
+    buttonText: { color: colors.onPrimary, fontSize: 14 },
+    save: {
+      minHeight: 48,
+      borderRadius: 14,
+      backgroundColor: colors.accent,
+      flexDirection: 'row',
+      gap: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 4,
+    },
+    saveText: { color: colors.primary, fontWeight: '600', fontSize: 14 },
+    secondary: {
+      minHeight: 48,
+      borderRadius: 12,
+      backgroundColor: colors.primaryRaised,
+      padding: 14,
+      marginTop: 12,
+      alignItems: 'center',
+    },
+    links: { flexDirection: 'row', justifyContent: 'space-between' },
+    link: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 6 },
+    danger: { color: colors.danger, fontSize: 14 },
+    privacy: { color: colors.onPrimaryMuted, fontSize: 11, lineHeight: 17 },
+    title: {
+      fontSize: 22,
+      color: colors.onPrimary,
+      fontWeight: '600',
+      marginBottom: 12,
+    },
+    helper: { fontSize: 14, color: colors.onPrimaryMuted, lineHeight: 21 },
+    disabled: { opacity: 0.5 },
+  });

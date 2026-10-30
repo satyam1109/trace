@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { isBrowser, ledger } from '../services/ledger';
 import { Icon } from '../components/Icon';
 import { allCategories, id, type Category } from '../finance/model';
@@ -19,6 +19,8 @@ import {
 import { useFinance } from './store';
 import { VendorSettings } from './VendorSettings';
 import { useTheme, ui } from './theme';
+import { GlassPressable } from './GlassPressable';
+import { version as appVersion } from '../../package.json';
 const diagnostics: Record<string, string> = {
   never_received: 'No incoming SMS checked yet.',
   paused: 'Detection was paused when the last SMS arrived.',
@@ -80,21 +82,20 @@ export function Settings({
         <Copy muted>
           Choose a theme. System follows your phone’s appearance.
         </Copy>
-        {(['system', 'light', 'dark'] as const).map(v => (
-          <Setting
-            key={v}
-            title={
-              v === 'system'
-                ? 'System default'
-                : v === 'light'
-                ? 'Light'
-                : 'Dark'
-            }
-            value={preferences.theme === v ? 'Selected' : ''}
-            icon="eye"
-            onPress={() => run(() => savePreferences({ theme: v }))}
-          />
-        ))}
+        <View style={settingsStyles.appearances}>
+          {(['system', 'light', 'dark'] as const).map(v => (
+            <AppearanceChoice
+              key={v}
+              theme={v}
+              selected={preferences.theme === v}
+              disabled={working}
+              onPress={() => run(() => savePreferences({ theme: v }))}
+            />
+          ))}
+        </View>
+        <Copy muted size={12}>
+          Your choice applies to every screen and the payment popup.
+        </Copy>
       </>
     );
   if (section === 'profile')
@@ -459,92 +460,320 @@ export function Settings({
     );
   return (
     <>
-      <Card onPress={() => onNavigate('profile')}>
-        <View style={ui.row}>
-          <View style={[ui.iconBox, { backgroundColor: c.goldSoft }]}>
-            <Copy bold color={c.goldInk}>
-              {preferences.name?.slice(0, 1).toUpperCase() || 'Y'}
-            </Copy>
-          </View>
-          <View style={ui.fill}>
-            <Copy bold size={19}>
-              {preferences.name || 'Your profile'}
-            </Copy>
-            <Copy muted size={12}>
-              Local profile · No sign-in required
-            </Copy>
-          </View>
-          <Icon name="arrow" color={c.muted} />
+      <GlassPressable
+        label="Your profile"
+        onPress={() => onNavigate('profile')}
+        contentStyle={settingsStyles.profile}
+        radius={24}
+      >
+        <View style={[settingsStyles.avatar, { backgroundColor: c.surface }]}>
+          <Copy size={23}>
+            {preferences.name?.slice(0, 1).toUpperCase() || 'Y'}
+          </Copy>
         </View>
-      </Card>
-      <Section title="Personalise" />
-      <Setting
-        title="Appearance"
-        subtitle={
-          preferences.theme === 'system'
-            ? 'System default'
-            : preferences.theme === 'dark'
-            ? 'Dark'
-            : 'Light'
-        }
-        icon="eye"
-        onPress={() => onNavigate('appearance')}
-      />
-      <Setting
-        title="Categories"
-        subtitle="Expense categories and custom labels"
-        icon="bag"
-        onPress={() => onNavigate('categories')}
-      />
-      <Setting
-        title="Remembered vendors"
-        subtitle="Automatic categories for repeat payments"
-        icon="bag"
-        onPress={() => onNavigate('vendors')}
-      />
-      <Setting
-        title="Budget defaults"
-        subtitle="Monthly and category limits"
-        icon="wallet"
-        onPress={() => onNavigate('budgets')}
-      />
-      <Setting
-        title="Budget alerts"
-        subtitle="Local notifications and thresholds"
-        icon="info"
-        onPress={() => onNavigate('alerts')}
-      />
-      <Section title="Privacy & data" />
-      <Setting
-        title="Payment detection"
-        subtitle="SMS access and receiver status"
-        icon="shield"
-        onPress={() => onNavigate('detection')}
-      />
-      <Setting
-        title="Payment location"
-        subtitle={snapshot?.locationEnabled ? 'Enabled' : 'Optional · Off'}
-        icon="bank"
-        onPress={() => onNavigate('location')}
-      />
-      <Setting
-        title="App lock"
-        subtitle="Device biometric or screen lock"
-        icon="lock"
-        onPress={() => onNavigate('security')}
-      />
-      <Setting
-        title="Data & storage"
-        subtitle="Workspace and reset options"
-        icon="activity"
-        onPress={() => onNavigate('data')}
-      />
-      <Copy muted size={12}>
-        Trace · Offline money tracking · v0.2.4
-      </Copy>
+        <View style={ui.fill}>
+          <Copy size={23}>{preferences.name || 'Your profile'}</Copy>
+          <Copy muted size={12}>
+            On this device · {preferences.currency}
+          </Copy>
+        </View>
+        <Icon name="arrow" color={c.muted} size={18} />
+      </GlassPressable>
+      <SettingsGroup title="Make it yours">
+        <SettingsLink
+          title="Appearance"
+          icon="eye"
+          value={
+            preferences.theme === 'system'
+              ? 'System'
+              : preferences.theme === 'dark'
+              ? 'Dark'
+              : 'Light'
+          }
+          onPress={() => onNavigate('appearance')}
+        />
+        <SettingsLink
+          title="Categories"
+          icon="bag"
+          onPress={() => onNavigate('categories')}
+        />
+        <SettingsLink
+          title="Remembered vendors"
+          icon="activity"
+          last
+          onPress={() => onNavigate('vendors')}
+        />
+      </SettingsGroup>
+      <SettingsGroup title="Planning">
+        <SettingsLink
+          title="Budget defaults"
+          icon="wallet"
+          onPress={() => onNavigate('budgets')}
+        />
+        <SettingsLink
+          title="Budget alerts"
+          icon="info"
+          value={preferences.alerts ? 'On' : 'Off'}
+          last
+          onPress={() => onNavigate('alerts')}
+        />
+      </SettingsGroup>
+      <SettingsGroup title="Privacy & data">
+        <SettingsLink
+          title="Payment detection"
+          icon="shield"
+          onPress={() => onNavigate('detection')}
+        />
+        <SettingsLink
+          title="Payment location"
+          icon="bank"
+          value={snapshot?.locationEnabled ? 'On' : 'Off'}
+          onPress={() => onNavigate('location')}
+        />
+        <SettingsLink
+          title="App lock"
+          icon="lock"
+          value={preferences.appLock ? 'On' : 'Off'}
+          onPress={() => onNavigate('security')}
+        />
+        <SettingsLink
+          title="Data & storage"
+          icon="activity"
+          last
+          onPress={() => onNavigate('data')}
+        />
+      </SettingsGroup>
+      <View style={settingsStyles.footer}>
+        <Icon name="shield" size={16} color={c.muted} />
+        <Copy muted size={12}>
+          Stored on your device · Trace {appVersion}
+        </Copy>
+      </View>
     </>
   );
 }
+function SettingsGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  const { colors: c } = useTheme();
+  return (
+    <View style={settingsStyles.group}>
+      <Copy muted size={12} style={settingsStyles.groupTitle}>
+        {title}
+      </Copy>
+      <View style={[settingsStyles.groupBody, { backgroundColor: c.surface }]}>
+        {children}
+      </View>
+    </View>
+  );
+}
+function SettingsLink({
+  title,
+  icon,
+  value,
+  last,
+  onPress,
+}: {
+  title: string;
+  icon: string;
+  value?: string;
+  last?: boolean;
+  onPress: () => void;
+}) {
+  const { colors: c } = useTheme();
+  return (
+    <GlassPressable label={title} onPress={onPress} radius={18}>
+      <View style={settingsStyles.link}>
+        <Icon name={icon} color={c.muted} size={20} />
+        <View
+          style={[
+            settingsStyles.linkBody,
+            {
+              borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
+              borderColor: c.line,
+            },
+          ]}
+        >
+          <Copy size={14} style={ui.fill}>
+            {title}
+          </Copy>
+          {value ? (
+            <Copy muted size={12}>
+              {value}
+            </Copy>
+          ) : null}
+          <Icon name="arrow" color={c.muted} size={15} />
+        </View>
+      </View>
+    </GlassPressable>
+  );
+}
+function AppearanceChoice({
+  theme,
+  selected,
+  disabled,
+  onPress,
+}: {
+  theme: 'system' | 'light' | 'dark';
+  selected: boolean;
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const { colors: c } = useTheme();
+  const title =
+    theme === 'system'
+      ? 'System default'
+      : theme === 'light'
+      ? 'Light'
+      : 'Dark';
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ selected, disabled }}
+      aria-pressed={selected}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        settingsStyles.appearance,
+        {
+          borderColor: selected ? c.ink : c.line,
+          backgroundColor: c.surface,
+          opacity: pressed ? 0.7 : 1,
+        },
+      ]}
+    >
+      <View
+        style={settingsStyles.preview}
+        importantForAccessibility="no-hide-descendants"
+        aria-hidden
+      >
+        {(theme === 'system' ? [false, true] : [theme === 'dark']).map(
+          (darkPreview, i) => (
+            <View
+              key={i}
+              style={[
+                settingsStyles.previewHalf,
+                { backgroundColor: darkPreview ? '#17191C' : '#FAF9F6' },
+              ]}
+            >
+              <View
+                style={[
+                  settingsStyles.previewLine,
+                  {
+                    width: '50%',
+                    backgroundColor: darkPreview ? '#A5A9AF' : '#6E7279',
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  settingsStyles.previewTotal,
+                  { backgroundColor: darkPreview ? '#F1F0EC' : '#202329' },
+                ]}
+              />
+              <View
+                style={[
+                  settingsStyles.previewCard,
+                  { backgroundColor: darkPreview ? '#30343A' : '#E9E8E3' },
+                ]}
+              />
+            </View>
+          ),
+        )}
+      </View>
+      <View style={settingsStyles.appearanceLabel}>
+        <Copy size={12} style={ui.fill}>
+          {title}
+        </Copy>
+        <View
+          style={[
+            settingsStyles.radio,
+            {
+              borderColor: selected ? c.ink : c.muted,
+              backgroundColor: selected ? c.ink : 'transparent',
+            },
+          ]}
+        >
+          {selected ? <Icon name="check" size={12} color={c.bg} /> : null}
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+const settingsStyles = StyleSheet.create({
+  profile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 15,
+    marginBottom: 8,
+  },
+  avatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  group: { gap: 10, marginBottom: 8 },
+  groupTitle: { paddingHorizontal: 4 },
+  groupBody: { borderRadius: 24, paddingHorizontal: 14, paddingVertical: 3 },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingLeft: 3 },
+  linkBody: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    minHeight: 60,
+    paddingVertical: 14,
+    paddingRight: 3,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    paddingVertical: 14,
+  },
+  appearances: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
+  appearance: {
+    flexGrow: 1,
+    flexBasis: 100,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    padding: 10,
+    gap: 14,
+  },
+  preview: {
+    flexDirection: 'row',
+    height: 130,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  previewHalf: { flex: 1, paddingHorizontal: 9, paddingVertical: 16, gap: 10 },
+  previewLine: { height: 4, borderRadius: 2 },
+  previewTotal: { height: 9, width: '78%', borderRadius: 3 },
+  previewCard: { height: 39, borderRadius: 8, marginTop: 8 },
+  appearanceLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    minHeight: 32,
+  },
+  radio: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
 function ResetConfirmation({
   onClose,
   onDone,

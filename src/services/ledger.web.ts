@@ -118,13 +118,15 @@ function restore(): Transaction[] {
       0,
       0,
     );
+    // A morning preview must not seed payments later than the current time.
+    const at = Math.min(when.getTime(), Date.now());
     return {
       ...payment,
       source: 'sms',
       id: `demo-seed-${index}`,
-      receivedAt: when.getTime(),
+      receivedAt: at,
       transactionAt: null,
-      autoSaveAt: when.getTime() - 1,
+      autoSaveAt: at - 1,
       confirmed: true,
       category: 'expense',
       expenseCategory: [

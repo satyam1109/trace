@@ -267,7 +267,7 @@ export function Savings({
               value={data.surplus}
               currency={preferences.currency}
               size={40}
-              color={c.gold}
+              color={c.onNavy}
             />
             <Copy color={c.onNavy} size={12}>
               Recorded income − expenses
@@ -275,7 +275,10 @@ export function Savings({
             </Copy>
             {plan.savingsTarget ? (
               <>
-                <Progress value={(data.surplus / plan.savingsTarget) * 100} />
+                <Progress
+                  value={(data.surplus / plan.savingsTarget) * 100}
+                  color={c.onNavy}
+                />
                 <Copy color={c.onNavy} size={12}>
                   Target {formatMoney(plan.savingsTarget, preferences.currency)}{' '}
                   ·{' '}
@@ -518,6 +521,7 @@ export function GoalEditor({
         value={icon}
         onChange={setIcon}
         options={[
+          { value: 'laptop', label: 'Laptop' },
           { value: 'wallet', label: 'Savings' },
           { value: 'car', label: 'Travel' },
           { value: 'bag', label: 'Shopping' },
@@ -548,9 +552,9 @@ export function GoalDetails({
   const total = allocated(finance, goal.id);
   return (
     <>
-      <Card style={{ alignItems: 'center' }}>
-        <Icon name={goal.icon} color={c.goldInk} size={32} />
-        <Amount value={total} currency={goal.currency} size={42} />
+      <View style={{ gap: 15, paddingTop: 18, paddingBottom: 12 }}>
+        <Icon name={goal.icon} color={c.muted} size={26} />
+        <Amount value={total} currency={goal.currency} size={46} weight="400" />
         <Copy muted>
           allocated of {formatMoney(goal.target, goal.currency)}
         </Copy>
@@ -565,7 +569,7 @@ export function GoalDetails({
             ? 'Goal reached'
             : formatMoney(goal.target - total, goal.currency) + ' to go'}
         </Copy>
-      </Card>
+      </View>
       <Setting
         title="Target date"
         subtitle={goal.due || 'Not set'}
@@ -717,7 +721,7 @@ export function Lending({
           value={total}
           currency={preferences.currency}
           size={42}
-          color={c.gold}
+          color={c.onNavy}
         />
         <Copy size={12} color={c.onNavy}>
           Money owed to you · Separate from spending

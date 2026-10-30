@@ -3,7 +3,7 @@ import { PanResponder, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line, Path, Text as SvgText } from './Svg';
 import { formatMoney, type Currency } from '../finance/model';
 import { Amount, Copy } from './components';
-import { dashboardColors as c } from './dashboardTheme';
+import { useTheme } from './theme';
 
 const compactMoney = (v: number, currency: Currency) => {
   const mark = formatMoney(0, currency).replace(/[\d,.\s]/g, '');
@@ -31,6 +31,7 @@ export function Trend({
   onSelect: (index: number) => void;
   currency: Currency;
 }) {
+  const { colors: c } = useTheme();
   const [width, setWidth] = useState(330);
   const handler = useRef(onSelect);
   handler.current = onSelect;
@@ -282,6 +283,7 @@ export function Donut({
           value={total}
           currency={currency}
           size={29}
+          weight="400"
           fit
           label="Category spending total"
         />

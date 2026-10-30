@@ -1,6 +1,6 @@
 {
   "name": "TraceMyMoney",
-  "version": "0.2.4",
+  "version": "0.2.7",
   "private": true,
   "scripts": {
     "generate:banks": "node scripts/generate-bank-registry.cjs",

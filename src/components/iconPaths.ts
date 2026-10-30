@@ -1,4 +1,5 @@
 export const paths: Record<string, string> = {
+  laptop: 'M5 4h14v12H5z M2 20h20l-2-4H4z',
   target:
     'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0 M17 12a5 5 0 1 1-10 0 5 5 0 0 1 10 0 M12 12l9-9 M16 3h5v5',
   home: 'M3 10l9-7 9 7 M5 9v12h5v-7h4v7h5V9',

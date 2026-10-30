@@ -33,7 +33,9 @@ class LendingVerification : Instrumentation() {
             val context = targetContext
             val prefs = context.getSharedPreferences("lending.verification", 0)
             val repository = LedgerRepository.get(context)
-            if (phase == "analytics-ui") {
+            if (phase == "quiet-ui") {
+                QuietUiVerification.run(this, repository) { value, name -> expect(value, name) }
+            } else if (phase == "analytics-ui") {
                 AnalyticsUiVerification.run(this) { value, name -> expect(value, name) }
             } else if (phase.startsWith("vendor-")) {
                 VendorVerification.run(this, phase, repository) { value, name -> expect(value, name) }

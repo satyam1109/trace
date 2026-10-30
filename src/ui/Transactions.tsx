@@ -1,6 +1,6 @@
 import DateField from './DateField';
 import React, { useState } from 'react';
-import { Linking, Pressable, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon } from '../components/Icon';
 import {
   transactionTime,
@@ -13,6 +13,7 @@ import { localPaymentTime } from '../services/manualExpense';
 import {
   allCategories,
   incomeCategories,
+  localDate,
   categoryFor,
   currencyOf,
   dateText,
@@ -39,14 +40,19 @@ import {
 import { useFinance } from './store';
 import { useTheme, ui } from './theme';
 import { GlassPressable } from './GlassPressable';
+import { useToday } from './useToday';
 export function TransactionRow({
   item,
   onPress,
   glass = false,
+  quiet = false,
+  groupedByDate = false,
 }: {
   item: Transaction;
   onPress: () => void;
   glass?: boolean;
+  quiet?: boolean;
+  groupedByDate?: boolean;
 }) {
   const { finance } = useFinance(),
     { colors: c, dark } = useTheme();
@@ -58,31 +64,58 @@ export function TransactionRow({
   )}`;
   const content = (
     <>
-      <View style={[ui.iconBox, { backgroundColor: c.subtle }]}>
+      <View
+        style={[
+          ui.iconBox,
+          { backgroundColor: c.subtle },
+          quiet && { width: 36, height: 36, borderRadius: 18 },
+        ]}
+      >
         <Icon
           name={item.category === 'lent' ? 'lend' : cat.icon}
-          color={item.category === 'lent' ? c.goldInk : cat.color}
+          color={
+            quiet ? c.muted : item.category === 'lent' ? c.goldInk : cat.color
+          }
+          size={quiet ? 19 : 24}
         />
       </View>
       <View style={{ flex: 1, gap: 4 }}>
-        <Copy bold>{item.recipient || (income ? 'Income' : 'Payment')}</Copy>
+        <Copy bold={!quiet} size={quiet ? 14 : 15}>
+          {item.recipient || (income ? 'Income' : 'Payment')}
+        </Copy>
         <Copy size={11} muted>
-          {dateText(transactionTime(item))} ·{' '}
-          {methodLabels[item.method] || 'Card'}
+          {quiet
+            ? cat.name
+            : groupedByDate
+            ? timeText(transactionTime(item))
+            : dateText(transactionTime(item))}{' '}
+          ·{' '}
+          {quiet
+            ? new Date(transactionTime(item)).toDateString() ===
+              new Date().toDateString()
+              ? timeText(transactionTime(item))
+              : dateText(transactionTime(item))
+            : methodLabels[item.method] || 'Card'}
         </Copy>
       </View>
       <View style={{ alignItems: 'flex-end', gap: 4, maxWidth: '47%' }}>
-        <Copy bold color={income ? c.positive : c.ink}>
+        <Copy
+          bold={!quiet}
+          size={quiet ? 14 : 15}
+          color={income ? c.positive : c.ink}
+        >
           {income ? '+' : '−'}
           {formatMoney(item.amountPaise, currencyOf(item))}
         </Copy>
-        <Copy muted size={10}>
-          {item.category === 'lent'
-            ? 'Lent money'
-            : item.category === 'transfer'
-            ? 'Transfer / card bill'
-            : cat.name}
-        </Copy>
+        {!quiet ? (
+          <Copy muted size={10}>
+            {item.category === 'lent'
+              ? 'Lent money'
+              : item.category === 'transfer'
+              ? 'Transfer / card bill'
+              : cat.name}
+          </Copy>
+        ) : null}
       </View>
     </>
   );
@@ -92,7 +125,11 @@ export function TransactionRow({
       onPress={onPress}
       light={!dark}
       radius={18}
-      contentStyle={[ui.setting, { borderColor: c.line }]}
+      contentStyle={[
+        ui.setting,
+        { borderColor: c.line },
+        quiet && { borderBottomWidth: 0, minHeight: 66, paddingVertical: 12 },
+      ]}
     >
       {content}
     </GlassPressable>
@@ -456,6 +493,9 @@ export function History({
   onOpen: (t: Transaction) => void;
 }) {
   const { finance, preferences } = useFinance();
+  const today = useToday();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
   const [search, setSearch] = useState(''),
     [type, setType] = useState(initial?.type || 'all'),
     [category, setCategory] = useState(initial?.category || 'all'),
@@ -506,6 +546,16 @@ export function History({
       : sort === 'oldest'
       ? transactionTime(a) - transactionTime(b)
       : transactionTime(b) - transactionTime(a),
+  );
+  const byDate = new Map<string, Transaction[]>();
+  for (const row of rows) {
+    const day = localDate(new Date(transactionTime(row)));
+    const group = byDate.get(day);
+    if (group) group.push(row);
+    else byDate.set(day, [row]);
+  }
+  const days = [...byDate.entries()].sort(([a], [b]) =>
+    sort === 'oldest' ? a.localeCompare(b) : b.localeCompare(a),
   );
   return (
     <>
@@ -573,8 +623,8 @@ export function History({
             options={[
               { value: 'newest', label: 'Newest first' },
               { value: 'oldest', label: 'Oldest first' },
-              { value: 'highest', label: 'Highest amount' },
-              { value: 'lowest', label: 'Lowest amount' },
+              { value: 'highest', label: 'Highest amount per day' },
+              { value: 'lowest', label: 'Lowest amount per day' },
             ]}
           />
           <DateField
@@ -607,9 +657,38 @@ export function History({
         title={`${rows.length} ${rows.length === 1 ? 'entry' : 'entries'}`}
       />
       {rows.length ? (
-        rows.map(t => (
-          <TransactionRow key={t.id} item={t} onPress={() => onOpen(t)} />
-        ))
+        days.map(([day, transactions]) => {
+          const relative =
+            day === localDate(today)
+              ? 'Today'
+              : day === localDate(yesterday)
+              ? 'Yesterday'
+              : '';
+          return (
+            <View
+              key={day}
+              testID={`history-day-${day}`}
+              style={historyStyles.day}
+            >
+              <Text accessibilityRole="header" style={historyStyles.heading}>
+                <Copy muted size={12}>
+                  {relative ? `${relative} · ` : ''}
+                  {dateText(transactionTime(transactions[0]))}
+                </Copy>
+              </Text>
+              <View>
+                {transactions.map(t => (
+                  <TransactionRow
+                    key={t.id}
+                    item={t}
+                    groupedByDate
+                    onPress={() => onOpen(t)}
+                  />
+                ))}
+              </View>
+            </View>
+          );
+        })
       ) : (
         <Empty
           title="No matching entries"
@@ -620,3 +699,7 @@ export function History({
     </>
   );
 }
+const historyStyles = StyleSheet.create({
+  day: { gap: 4, marginBottom: 12 },
+  heading: { paddingTop: 10, paddingBottom: 4 },
+});

@@ -1,4 +1,4 @@
-# Payment popup — 0.2.1 build 13
+# Payment popup — 0.2.5 build 17
 
 A supported debit is saved to the encrypted ledger before attempting any popup.
 There is no required form. This remains true with popup permission denied,
@@ -10,10 +10,10 @@ The native Android popup slides upward near the bottom of the screen. It starts
 as a small rounded card with only a drag handle and the payment summary:
 
 ```text
-trace / PAYMENT DETECTED
+trace. / PAYMENT DETECTED
 ₹240.00
-UPI · HDFC Bank · ••1234
 To Example Cafe
+UPI · HDFC Bank · ••1234
 ```
 
 These are illustrative values; the card uses the detected payment's actual
@@ -69,10 +69,12 @@ location and metadata writes preserve each other.
 
 ## Finish and accessibility
 
-The existing navy/gold palette now has a rounded, translucent glass-style surface,
-a subtle highlight and border. Android 12+ cross-window blur is used when the
-device supports and enables it. A listener switches to an opaque navy gradient
-when blur is disabled, including by device/system policy. This is an Android
+The Quiet palette follows the saved light/dark/system preference, with warm paper
+or charcoal, restrained typography and a subtle border. The entire dialog starts
+hidden before its first frame, then slides and scales gently into place over
+480ms with settling. Android 12+ cross-window blur is used when the device
+supports and enables it. A listener switches to an opaque surface when blur is
+disabled, including by device/system policy. This is an Android
 adaptation, not Apple's Liquid Glass framework. Native FLAG_SECURE remains on;
 no screenshot capture of underlying apps is used to create blur.
 
